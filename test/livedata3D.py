@@ -2,7 +2,11 @@
 
 import serial
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+fig = plt.figure()
+ax = plt.axes(projection='3d')
 import time
+import random
 
 #getting serial data
 
@@ -22,7 +26,6 @@ index = 0           #for some reason the first value is buggy, use this so circu
 #initializing plot and time
 
 plt.ion()
-#plt.axis([0,10,0,10])
 time1 = time.time()
 time2 = time.time()
 
@@ -40,17 +43,16 @@ while time2 - time1 < 300:
             a = a.split(",")
             a = ([x for x in a if x])
             if index!=0:
-                print(a)
-            #if index%2 == 0:
-            #    val_a.append(a[index])
-            #elif index%2 == 1:
-            #    print(val_b)
-            #    val_b.append(a[index])
                 x = float(a[0])
                 y = float(a[1])
-                plt.scatter(x,y)
+                #z needs to be initialized to something (probably a[2] but needs testing)
+                z = random.randint(0,10)
                 
+                ax.scatter(x,y,z)
+                #needs delay or else crashes
                 plt.pause(0.0001)
+                
                 time2 = time.time()
+            
             index += 1
             line = []
