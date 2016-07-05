@@ -1,8 +1,10 @@
 %initializing and running fcm on log rms values of muscles
+%code can be run in MATLAB/octave
 
 %change filename if needed
-X = csvread('m_fore2.csv',2);
-%second number changes clusters
+X = csvread('test.csv',2);
+%second number changes clusters (goes up to 6 thus far)
+%can add more in for loop
 [A,B,C] = fcm(X,4);
 
 [~,maxindex] = max(B,[],1);

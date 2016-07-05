@@ -1,8 +1,12 @@
 %initializing and running fcm on log rms values of muscles
+%code can be run in MATLAB/Octave
 
 %change filename if needed
-X = csvread('g_forearm4.csv',2);
-%second number changes clusters
+%files should be in format in which first row is data titles
+%second row indicating start of numerical data
+X = csvread('test.csv',2);
+
+%second number changes clusters (goes up to 6 atm)
 [A,B] = kmeans(X,6);
 maxindex = size(A,1);
 
@@ -42,7 +46,6 @@ end
 
 
 %plotting centroids
-B
 figure(3);
 x = B(:,1);
 y = B(:,2);
