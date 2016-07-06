@@ -39,6 +39,7 @@ time2 = time.time()
 #MAIN LOOP
 
 #while True:
+#can change time below (seconds)
 while time2 - time1 < 30:    
     for c in ser.readline():
         if not(c == 13):
@@ -50,12 +51,6 @@ while time2 - time1 < 30:
             a = ([x for x in a if x])
             if index!=0:
                 print(a)
-            #if index%2 == 0:
-            #    val_a.append(a[index])
-            #elif index%2 == 1:
-            #    print(val_b)
-            #    val_b.append(a[index])
-                
                 x = float(a[0])
                 y = float(a[1])
                 all_data.append([x,y])
@@ -66,6 +61,7 @@ while time2 - time1 < 30:
             line = []
 
 #filename is the time
+
 num1 = datetime.datetime.now().date() 
 num2 = datetime.datetime.now().time() 
 num =  num1.isoformat() + "..." + num2.isoformat()
@@ -73,6 +69,7 @@ num = (str(num).replace(":","-"))
 num = (str(num).replace("-","."))
 
 #change save location below
+
 with open('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + num + '.csv', 'w', newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=' ',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -81,7 +78,7 @@ with open('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + n
 
 print("file saved as: " + 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + str(num) + '.csv')
 
-#make a nested list, first list is x values seperated by double space, second list is y values
+#make a nested array, each index being an array of log rms (length = # of trials)
 
 x_val = []
 y_val = []
@@ -95,6 +92,7 @@ alldata = np.asarray(alldata)
 #print(alldata)
 
 #running fuzzy c-means algorithm (second num is # clusters)
+
 cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
     alldata, 4, 2, error=0.0005, maxiter=10000, init=None, seed=None)
 cluster_membership = np.argmax(u, axis=0)
@@ -105,6 +103,12 @@ for j in range(4):
         if cluster_membership[i] == j:
             plt.plot(x_val[i], y_val[i], '.', color = colors[j])
     plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+
+#adding line between centroids
+
+for point in cntr:
+    for point2 in cntr:
+        plt.plot([point[0], point2[0]], [point[1], point2[1]],"-b")
 
 #SECONDARY LOOP
 #continuing after saved file (indefinitely atm)
@@ -120,12 +124,6 @@ while True:
             a = ([x for x in a if x])
             if index!=0:
                 print(a)
-            #if index%2 == 0:
-            #    val_a.append(a[index])
-            #elif index%2 == 1:
-            #    print(val_b)
-            #    val_b.append(a[index])
-                
                 x = float(a[0])
                 y = float(a[1])
                 all_data.append([x,y])
@@ -136,6 +134,4 @@ while True:
             line = []
 
 
-#with open('test1.csv', 'wb') as testfile:
-    #csv_writer = csv.writer(testfile)
     
