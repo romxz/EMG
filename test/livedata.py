@@ -1,10 +1,21 @@
-#use with arduino code "new"
+"""
+PLOTTING LIVE DATA AND ANALYSIS
 
-#importing libraries
+use with arduino code "new3D"
+
+features as of current iteration 
+- live plotting
+- clustering (fuzzy c)
+- drawing lines between centroids
+- continued plotting
+"""
+
+""" A. INITIALIZATION AND SETUP """
+
+""" 1. importing the relevant libraries """
 
 import serial
 import matplotlib.pyplot as plt
-
 import time
 import csv
 import os
@@ -15,89 +26,64 @@ import math
 import skfuzzy as fuzz
 os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 
-#getting serial data
+""" 2. retrieving serial data """
 
 ser = serial.Serial(port='COM10',baudrate=9600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=0)
 
-#initializing variables
+""" 3. initializing starting variables """
 
 print("connected to: " + ser.portstr)
 line = []           #storing the numbers until it reaches a space
 index = 0           #for some reason the first value is buggy, use this so circumvent
 all_data = [["logrms1","logrms2"]]
 colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'Brown', 'ForestGreen']
-#test variables
-#vallist = []        
-#val_a = []
-#val_b = []
-#point = []
 
-#initializing plot and time
+""" 4. initializing plot and time """
 
 plt.ion()
 #plt.axis([0.5,5,0.5,5])
-
 time1 = time.time()
 time2 = time.time()
-#MAIN LOOP
 
-#time3 = 0
-#time4 = 0
 
-#while True:
-#can change time below (seconds)
-while time2 - time1 < 10:
-    
-    #time1 = time.time()
-    #a = time.time()
+""" B. INITIAL DATA COLLECTION AND ANALYSIS"""
+
+
+""" 1. starting the loop """
+
+
+while time2 - time1 < 10:       #can change time (seconds)
        
     for c in ser.readline():
         if not(c == 13):
             line.append(chr(c))
         
-            #b = time.time()
-        
         elif (c == 13):
-            
             a = ("".join(str(x) for x in line))
             a = a.replace("\n", ",")
             a = a.split(",")
             a = ([x for x in a if x])
-            #c = time.time()
-            #time2 = (c-b)
             
             
             if index%4==0:
-            #if index!=0:
                 
                 time100 = time.time()
-                #print(a)
                 x = float(a[0])
                 y = float(a[1])
                 all_data.append([x,y])
-                
-                #d = time.time()
-                #time3 = (d-c)
-                
+            
                 plt.scatter(x,y,s=10, color = "y")
                 plt.pause(0.000000001)
                 
-                #e = time.time()
-                #time4 = (e-d)
-                
                 time101 = time.time()
-                print ("FPS:" + str(1/(time101-time100)))
+                #print ("FPS:" + str(1/(time101-time100)))
                     
             index += 1
             line = []
     
     time2 = time.time()
     
-    #max_value = max([time2,time3,time4])
-    #max_index = [time2,time3,time4].index(max_value)
-    #print(max_index)
-    
-#filename is the time
+""" 2. storing the data in csv file """
 
 num1 = datetime.datetime.now().date() 
 num2 = datetime.datetime.now().time() 
@@ -106,7 +92,6 @@ num = (str(num).replace(":","-"))
 num = (str(num).replace("-","."))
 
 #change save location below
-
 with open('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + num + '.csv', 'w', newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=' ',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -115,7 +100,7 @@ with open('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + n
 
 print("file saved as: " + 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + str(num) + '.csv')
 
-#make a nested array, each index being an array of log rms (length = # of trials)
+""" 3. setting up and running the fuzzy c means algorithm """
 
 x_val = []
 y_val = []
@@ -126,42 +111,39 @@ alldata = [x_val[2:len(x_val)], y_val[2:len(y_val)]]
 x_val = alldata[0];
 y_val = alldata[1];
 alldata = np.asarray(alldata)
-#print(alldata)
-
-#running fuzzy c-means algorithm (second num is # clusters)
 
 cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
-    alldata, 5, 2, error=0.0005, maxiter=10000, init=None, seed=None)
+    alldata, 5, 2, error=0.0005, maxiter=10000, init=None, seed=None) #second par is clusters
 cluster_membership = np.argmax(u, axis=0)
 print(cluster_membership)
-#change depending on number clusters
-for j in range(5):
+
+""" 4. plotting the points according to membership + plotting centroids """
+
+for j in range(5):              #change depending on number clusters
     for i in range(len(cluster_membership)):
         if cluster_membership[i] == j:
             plt.plot(x_val[i], y_val[i], '.', color = colors[j])
     plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
     
-#adding line between centroids
+""" 5. adding line between centroids """
 
 """for point in cntr:
     for point2 in cntr:
         plt.plot([point[0], point2[0]], [point[1], point2[1]],"-b")"""
         
-#saving the figure
+""" 6. saving the figure as a png file """
 
 plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\figures' + num + '.png')
         
-#plot reset
+""" 7. resetting the plot with only centroids """
 
 plt.clf()
 for j in range(5):              #change value to match clusters
     plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
 
-#SECONDARY LOOP
-#continuing after saved file (indefinitely atm)
+""" C. SECOND LOOP (RUNS INDEFINITELY) """
 
 index = 0 
-currentarray = []
 while True:  
     n=3
     for c in ser.readline():
@@ -174,9 +156,7 @@ while True:
             a = ([x for x in a if x])
             x = float(a[0])
             y = float(a[1])
-            print([x,y])
-            if index%3==0:
-                print(a)
+            if index%4==0:
                 x = float(a[0])
                 y = float(a[1])
                 all_data.append([x,y])
@@ -184,11 +164,39 @@ while True:
                 plt.pause(0.00000001)
                 time2 = time.time()
                 plt.clf()
+                #plt.remove()
                 #plt.axis([0,100,0,100])
                 for j in range(5):              #change value to match clusters
                     plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
             index += 1
             line = []
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
             
             
             # if index<=5:
