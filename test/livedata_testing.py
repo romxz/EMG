@@ -9,6 +9,8 @@ import numpy as np
 import skfuzzy as fuzz
 import time
 
+fig, ax = plt.subplots()
+
 #this will store the line
 line = []
 vallist = []
@@ -17,11 +19,11 @@ val_b = []
 val_c = []
 colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'Brown', 'ForestGreen']
 #plt.ion
-#plt.axis([0,100,0,100])
+plt.axis([0,100,0,100])
 
 time1 = time.time()
 index = 0
-while index<100:
+while index<50:
     
     val_a.append(random.randint(0,100))
     val_b.append(random.randint(0,100))
@@ -51,7 +53,80 @@ for j in range(4):
             plt.plot(val_a[i], val_b[i], '.', color = colors[j])
     plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
 
-print(cntr)
 for point in cntr:
     for point2 in cntr:
         plt.plot([point[0], point2[0]], [point[1], point2[1]],"-b")
+
+plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\figures\\test3.png')
+  
+  
+        
+plt.clf()
+plt.axis([0,100,0,100])
+for j in range(4):              #change value to match clusters
+    plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+
+
+index = 0
+x = []
+y = []
+currentarray = []
+while index<1000:
+    
+    val_a.append(random.randint(0,100))
+    val_b.append(random.randint(0,100))
+    val_c.append(random.randint(0,100))
+    
+    if index<=10:
+        plt.scatter(val_a[-1], val_b[-1], s=10, color = "y")
+        #ax.scatter(val_a[-1], val_b[-1],val_c[-1])
+        index += 1
+        #insert the timing
+        plt.pause(0.00000000000001)
+        currentarray.append([val_a[-1], val_b[-1]])
+    if index>10:
+        plt.clf()
+        plt.axis([0,100,0,100])
+        for j in range(4):              #change value to match clusters
+            plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+        currentarray[index%5] = ([val_a[-1], val_b[-1]])
+        print(currentarray)
+        for i in currentarray:
+            plt.scatter(i[0],i[1], s=10, color = "y")
+        plt.pause(0.0001)
+        index += 1
+"""        
+while index<50:
+    
+    val_a.append(random.randint(0,100))
+    val_b.append(random.randint(0,100))
+    val_c.append(random.randint(0,100))
+    plt.scatter(val_a[-1], val_b[-1], s=10, color = "y")
+    
+    #ax.scatter(val_a[-1], val_b[-1],val_c[-1])
+    index += 1
+    #insert the timing
+    plt.pause(0.00000000000001)
+    if index%5 == 0:
+        plt.clf()
+        ax.clear()
+        plt.axis([0,100,0,100])
+        for j in range(4):              #change value to match clusters
+            plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+            plt.scatter([1,2,3,4],[3,4,5,6])
+
+time2 = time.time()
+print (200/(time2-time1))
+   
+    
+    
+    #print one at a time
+    
+    #plt.clf()
+    #plt.axis([0,100,0,100])
+    #for j in range(4):              #change value to match clusters
+    #    plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+
+time2 = time.time()
+print (200/(time2-time1))
+"""

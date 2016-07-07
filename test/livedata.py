@@ -35,7 +35,7 @@ colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'Brown', 'ForestGreen']
 #initializing plot and time
 
 plt.ion()
-plt.axis([0.5,5,0.5,5])
+#plt.axis([0.5,5,0.5,5])
 
 time1 = time.time()
 time2 = time.time()
@@ -46,7 +46,7 @@ time2 = time.time()
 
 #while True:
 #can change time below (seconds)
-while time2 - time1 < 200:
+while time2 - time1 < 10:
     
     #time1 = time.time()
     #a = time.time()
@@ -63,7 +63,6 @@ while time2 - time1 < 200:
             a = a.replace("\n", ",")
             a = a.split(",")
             a = ([x for x in a if x])
-            print(a)
             #c = time.time()
             #time2 = (c-b)
             
@@ -86,8 +85,8 @@ while time2 - time1 < 200:
                 #e = time.time()
                 #time4 = (e-d)
                 
-                #time101 = time.time()
-                #print ("FPS:" + str(1/(time101-time100)))
+                time101 = time.time()
+                print ("FPS:" + str(1/(time101-time100)))
                     
             index += 1
             line = []
@@ -141,19 +140,30 @@ for j in range(5):
         if cluster_membership[i] == j:
             plt.plot(x_val[i], y_val[i], '.', color = colors[j])
     plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
-
+    
 #adding line between centroids
 
 """for point in cntr:
     for point2 in cntr:
         plt.plot([point[0], point2[0]], [point[1], point2[1]],"-b")"""
+        
+#saving the figure
+
+plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\figures' + num + '.png')
+        
+#plot reset
+
+plt.clf()
+for j in range(5):              #change value to match clusters
+    plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
 
 #SECONDARY LOOP
 #continuing after saved file (indefinitely atm)
 
-"""
+index = 0 
+currentarray = []
 while True:  
-    n=4
+    n=3
     for c in ser.readline():
         if not(c == 13):
             line.append(chr(c)) 
@@ -162,7 +172,10 @@ while True:
             a = a.replace("\n", ",")
             a = a.split(",")
             a = ([x for x in a if x])
-            if index%n==0:
+            x = float(a[0])
+            y = float(a[1])
+            print([x,y])
+            if index%3==0:
                 print(a)
                 x = float(a[0])
                 y = float(a[1])
@@ -170,8 +183,47 @@ while True:
                 plt.scatter(x,y,s=40, color = "k")
                 plt.pause(0.00000001)
                 time2 = time.time()
+                plt.clf()
+                #plt.axis([0,100,0,100])
+                for j in range(5):              #change value to match clusters
+                    plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
             index += 1
             line = []
-    n = int(n+index/100)
-
-"""    
+            
+            
+            # if index<=5:
+            #    print(currentarray)
+            #    plt.scatter(x,y, s=10, color = "y")
+            #    #ax.scatter(val_a[-1], val_b[-1],val_c[-1])
+            #    index += 1
+            #    #insert the timing
+            #    plt.pause(0.00000000000001)
+            #    currentarray.append([x, y])
+            # elif index>5:
+            #    plt.clf()
+            #    #plt.axis([0.5,5,0.5,5])
+            #    for j in range(5):              #change value to match clusters
+            #        plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+            #    currentarray[index%5] = ([x, y])
+            #    print(currentarray)
+            #    for i in currentarray:
+            #        plt.scatter(i[0],i[1], s=10, color = "y")
+            #    plt.pause(0.0001)
+            #    index += 1
+            #line = []
+            
+            
+                   
+            # 
+            # if index%n==0:
+            #     print(a)
+            #     x = float(a[0])
+            #     y = float(a[1])
+            #     all_data.append([x,y])
+            #     plt.scatter(x,y,s=40, color = "k")
+            #     plt.pause(0.00000001)
+            #     time2 = time.time()
+            # index += 1
+            # line = []
+    #n = int(n+index/100)
+    
