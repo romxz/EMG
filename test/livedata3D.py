@@ -1,3 +1,5 @@
+#use with arduino code "new3D'
+
 #importing libraries
 
 import serial
@@ -15,6 +17,7 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 import numpy as np
 import skfuzzy as fuzz
 import datetime
+import math
 
 #getting serial data
 
@@ -53,11 +56,12 @@ while time2 - time1 < 120:
             a = a.replace("\n", ",")
             a = a.split(",")
             a = ([x for x in a if x])
-            if index!=0:
-                x = float(a[0])
-                y = float(a[1])
+            if index>=2:
+                x = math.log(float(a[0])+0.05)
+                y = math.log(float(a[1])+0.05)
                 #z needs to be initialized to something (probably a[2] but needs testing)
-                z = random.randint(0,10)
+                #z = random.randint(0,10)
+                z = math.log(float(a[2])+0.05)
                 all_data.append([x,y,z])
                 print([x,y,z])
                 ax.scatter(x,y,z, c='y', s=10, marker = "o")
@@ -115,11 +119,11 @@ for j in range(4):
     ax.scatter(cntr[j][0], cntr[j][1], cntr[j][2], c = colors[j], marker = "s", s = 50)
 
 #adding line between centroids
-
+"""
 for point in cntr:
     for point2 in cntr:
         ax.plot([point[0], point2[0]], [point[1], point2[1]], [point[2], point2[2]],"-b")
-
+"""
 
 #SECONDARY LOOP
 #continuing on after data has been saved (indefinitely atm)
@@ -133,11 +137,12 @@ while True:
             a = a.replace("\n", ",")
             a = a.split(",")
             a = ([x for x in a if x])
-            if index!=0:
-                x = float(a[0])
-                y = float(a[1])
+            if index>=2:
+                x = math.log(float(a[0])+0.05)
+                y = math.log(float(a[1])+0.05)
                 #z needs to be initialized to something (probably a[2] but needs testing)
-                z = random.randint(0,10)
+                #z = random.randint(0,10)
+                z = math.log(float(a[2])+0.05)
                 print([x,y,z])
                 all_data.append([x,y,z])
                 ax.scatter(x,y,z, c='y', s=10, marker = "o")

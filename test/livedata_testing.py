@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import random
 import numpy as np
 import skfuzzy as fuzz
+import time
 
 #this will store the line
 line = []
@@ -18,16 +19,23 @@ colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'Brown', 'ForestGreen']
 #plt.ion
 #plt.axis([0,100,0,100])
 
+time1 = time.time()
 index = 0
 while index<100:
+    
     val_a.append(random.randint(0,100))
     val_b.append(random.randint(0,100))
     val_c.append(random.randint(0,100))
     plt.scatter(val_a[-1], val_b[-1], s=10, color = "y")
+    
     #ax.scatter(val_a[-1], val_b[-1],val_c[-1])
     index += 1
     #insert the timing
     plt.pause(0.00000000000001)
+
+time2 = time.time()
+print (200/(time2-time1))
+
 
 #while True:
     #insert the timing
