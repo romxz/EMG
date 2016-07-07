@@ -1,3 +1,5 @@
+#use with arduino code "new3D'
+
 #importing libraries
 
 import serial
@@ -15,6 +17,7 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 import numpy as np
 import skfuzzy as fuzz
 import datetime
+import math
 
 #getting serial data
 
@@ -43,6 +46,7 @@ time2 = time.time()
 #MAIN LOOP
 
 #while True:
+#can change time below (seconds)
 while time2 - time1 < 120:    
     for c in ser.readline():
         if not(c == 13):
@@ -52,24 +56,23 @@ while time2 - time1 < 120:
             a = a.replace("\n", ",")
             a = a.split(",")
             a = ([x for x in a if x])
-            if index!=0:
-                x = float(a[0])
-                y = float(a[1])
+            if index>=2:
+                x = math.log(float(a[0])+0.05)
+                y = math.log(float(a[1])+0.05)
                 #z needs to be initialized to something (probably a[2] but needs testing)
-                z = random.randint(0,10)
+                #z = random.randint(0,10)
+                z = math.log(float(a[2])+0.05)
                 all_data.append([x,y,z])
                 print([x,y,z])
                 ax.scatter(x,y,z, c='y', s=10, marker = "o")
-                #ax.plot(x,y,z,'-b')
                 #needs delay or else crashes
                 plt.pause(0.00000001)
-                
                 time2 = time.time()
-            
             index += 1
             line = []
 
-#filename is the time
+#filename is the date/time
+
 num1 = datetime.datetime.now().date() 
 num2 = datetime.datetime.now().time() 
 num =  num1.isoformat() + "..." + num2.isoformat()
@@ -77,6 +80,7 @@ num = (str(num).replace(":","-"))
 num = (str(num).replace("-","."))
 
 #change save location below
+
 with open('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + str(num) + '.csv', 'w', newline='') as csvfile:
     writer = csv.writer(csvfile, delimiter=' ',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
@@ -86,7 +90,7 @@ with open('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + s
 print("file saved as: " + 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + str(num) + '.csv')
 
 
-#make a nested list, first list is x values seperated by double space, second list is y values
+#make a nested array, first array is x values, second array is y values
 x_val = []
 y_val = []
 z_val = []
@@ -102,6 +106,7 @@ alldata = np.asarray(alldata)
 #print(alldata)
 
 #running fuzzy c-means algorithm (second num is # clusters)
+
 cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
     alldata, 4, 2, error=0.0005, maxiter=10000, init=None, seed=None)
 cluster_membership = np.argmax(u, axis=0)
@@ -113,6 +118,12 @@ for j in range(4):
             ax.scatter(x_val[i], y_val[i], z_val[i], c = colors[j],s = 20, marker = "o")
     ax.scatter(cntr[j][0], cntr[j][1], cntr[j][2], c = colors[j], marker = "s", s = 50)
 
+#adding line between centroids
+"""
+for point in cntr:
+    for point2 in cntr:
+        ax.plot([point[0], point2[0]], [point[1], point2[1]], [point[2], point2[2]],"-b")
+"""
 
 #SECONDARY LOOP
 #continuing on after data has been saved (indefinitely atm)
@@ -126,11 +137,12 @@ while True:
             a = a.replace("\n", ",")
             a = a.split(",")
             a = ([x for x in a if x])
-            if index!=0:
-                x = float(a[0])
-                y = float(a[1])
+            if index>=2:
+                x = math.log(float(a[0])+0.05)
+                y = math.log(float(a[1])+0.05)
                 #z needs to be initialized to something (probably a[2] but needs testing)
-                z = random.randint(0,10)
+                #z = random.randint(0,10)
+                z = math.log(float(a[2])+0.05)
                 print([x,y,z])
                 all_data.append([x,y,z])
                 ax.scatter(x,y,z, c='y', s=10, marker = "o")
