@@ -17,7 +17,7 @@ int max2 = 300;
 
 void setup() {
 
-  Serial.begin(9600); //This line tells the Serial port to begin communicating at 9600 bauds
+  Serial.begin(300); //This line tells the Serial port to begin communicating at 9600 bauds
 }
 
 int counterArray = 0, counterRMS = 0;

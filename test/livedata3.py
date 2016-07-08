@@ -28,19 +28,19 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 
 """ 2. retrieving serial data """
 
-ser = serial.Serial(port='COM10',baudrate=300,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=0)
+ser = serial.Serial(port='COM10',baudrate=9600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=0)
 
 """ 3. initializing starting variables """
 
 print("connected to: " + ser.portstr)
-line = []           #storing the numbers until it reaches a space
+line = ""           #storing the numbers until it reaches a space
 index = 0           #for some reason the first value is buggy, use this so circumvent
 all_data = [["logrms1","logrms2"]]
 colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'Brown', 'ForestGreen']
 
 """ 4. initializing plot and time """
 
-#plt.ion()
+plt.ion()
 #plt.axis([0.5,5,0.5,5])
 time1 = time.time()
 time2 = time.time()
@@ -56,16 +56,19 @@ while time2 - time1 < 30:       #can change time (seconds)
        
     for c in ser.readline():
         if not(c == 13):
-            line.append(chr(c))
-        
+            print((chr(c)))
+            #line.append(chr(c))
+            line + (str(c))
+            print(line)
         elif (c == 13):
+            
             a = ("".join(str(x) for x in line))
             a = a.replace("\n", ",")
             a = a.split(",")
             a = ([x for x in a if x])
             
             
-            if index%4==0:
+            if index%3==0:
                 
                 time100 = time.time()
                 x = float(a[0])
@@ -79,7 +82,7 @@ while time2 - time1 < 30:       #can change time (seconds)
                 #print ("FPS:" + str(1/(time101-time100)))
                     
             index += 1
-            line = []
+            line = ""
     
     time2 = time.time()
     
@@ -143,6 +146,8 @@ for j in range(5):              #change value to match clusters
 
 """ C. SECOND LOOP (RUNS INDEFINITELY) """
 
+
+
 index = 0 
 while True:  
     n=3
@@ -156,7 +161,7 @@ while True:
             a = ([x for x in a if x])
             x = float(a[0])
             y = float(a[1])
-            if index%3==0:
+            if index%4==0:
                 x = float(a[0])
                 y = float(a[1])
                 all_data.append([x,y])

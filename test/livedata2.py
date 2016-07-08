@@ -16,6 +16,7 @@ features as of current iteration
 
 import serial
 import matplotlib.pyplot as plt
+from matplotlib import animation
 import time
 import csv
 import random
@@ -28,7 +29,7 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 
 """ 2. retrieving serial data """
 
-ser = serial.Serial(port='COM10',baudrate=300,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=0)
+ser = serial.Serial(port='COM10',baudrate=9600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=0)
 
 """ 3. initializing starting variables """
 
@@ -38,13 +39,17 @@ index = 0           #for some reason the first value is buggy, use this so circu
 all_data = [["logrms1","logrms2"]]
 colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'Brown', 'ForestGreen']
 
-""" 4. initializing plot and time """
+""" 4. initializing plot/time.variables """
 
-#plt.ion()
-#plt.axis([0.5,5,0.5,5])
+
+styles = ['r-', 'g-', 'y-', 'm-', 'k-', 'c-']
+fig = plt.figure()
+ax = plt.axes(xlim=(-10, 10), ylim=(-10, 10))
+
+# #plt.axis([0.5,5,0.5,5])
 time1 = time.time()
 time2 = time.time()
-
+ 
 
 """ B. INITIAL DATA COLLECTION AND ANALYSIS"""
 
@@ -52,7 +57,7 @@ time2 = time.time()
 """ 1. starting the loop """
 
 
-while time2 - time1 < 30:       #can change time (seconds)
+while time2 - time1 < 10:       #can change time (seconds)
        
     for c in ser.readline():
         if not(c == 13):
@@ -64,17 +69,18 @@ while time2 - time1 < 30:       #can change time (seconds)
             a = a.split(",")
             a = ([x for x in a if x])
             
-            
-            if index%4==0:
+        
+            if (index%1)==0:
                 
                 time100 = time.time()
                 x = float(a[0])
                 y = float(a[1])
                 all_data.append([x,y])
-            
+                print([x,y])
+                #anim = animation.FuncAnimation(fig, animate2,   
+                                           #frames=1, interval=0.01, blit=False)
                 plt.scatter(x,y,s=10, color = "y")
-                plt.pause(0.000000001)
-                
+                plt.pause(0.0000001)
                 time101 = time.time()
                 #print ("FPS:" + str(1/(time101-time100)))
                     
@@ -82,7 +88,47 @@ while time2 - time1 < 30:       #can change time (seconds)
             line = []
     
     time2 = time.time()
-    
+
+
+# while time2 - time1 < 100:       #can change time (seconds)
+#     for c in ser.read(80):
+#         if not(c == 13):
+#             line.append(chr(c))
+#         
+#         elif (c == 13):
+#             a = ("".join(str(x) for x in line))
+#             a = a.replace("\n", ",")
+#             a = a.split(",")
+#             a = ([x for x in a if x])
+#             print(a)
+#             x = float(a[0])
+#             y = float(a[1])
+#             plt.scatter(x,y,color = "y", s = 10)
+#             plt.pause(0.0001)
+#             #anim = animation.FuncAnimation(fig, animate2,
+#             #                frames=1, interval=0.01, blit=False)
+# 
+#     time2 = time.time()
+#     line = []
+#             
+#             if index%4==0:
+#                 
+#                 time100 = time.time()
+#                 x = float(a[0])
+#                 y = float(a[1])
+#                 all_data.append([x,y])
+#             
+#                 plt.scatter(x,y,s=10, color = "y")
+#                 plt.pause(0.000000001)
+#                 
+#                 time101 = time.time()
+#                 #print ("FPS:" + str(1/(time101-time100)))
+#                     
+#             index += 1
+#             line = []
+#     
+#     time2 = time.time()
+   
 """ 2. storing the data in csv file """
 
 num1 = datetime.datetime.now().date() 
@@ -122,8 +168,9 @@ print(cluster_membership)
 for j in range(5):              #change depending on number clusters
     for i in range(len(cluster_membership)):
         if cluster_membership[i] == j:
-            plt.plot(x_val[i], y_val[i], '.', color = colors[j])
-    plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+            plt.scatter(x_val[i], y_val[i], marker = ".", color = colors[j])
+    plt.scatter(cntr[j][0], cntr[j][1], color = colors[j], marker = "s")
+    plt.show()
     
 """ 5. adding line between centroids """
 
@@ -139,9 +186,17 @@ plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\figures' + num + 
 
 plt.clf()
 for j in range(5):              #change value to match clusters
-    plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+    plt.scatter(cntr[j][0], cntr[j][1], color = colors[j], marker = "s")
 
 """ C. SECOND LOOP (RUNS INDEFINITELY) """
+
+
+
+def animate2(i):
+    scat = plt.scatter(x, y, color = "y", s = 10)
+    return scat
+
+
 
 index = 0 
 while True:  
@@ -156,7 +211,7 @@ while True:
             a = ([x for x in a if x])
             x = float(a[0])
             y = float(a[1])
-            if index%3==0:
+            if index%4==0:
                 x = float(a[0])
                 y = float(a[1])
                 all_data.append([x,y])
@@ -167,7 +222,7 @@ while True:
                 #plt.remove()
                 #plt.axis([0,100,0,100])
                 for j in range(5):              #change value to match clusters
-                    plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+                    plt.scatter(cntr[j][0], cntr[j][1], color= colors[j], marker = "s")
             index += 1
             line = []
             
@@ -197,42 +252,41 @@ while True:
             
             
             
-            
-            
-            # if index<=5:
-            #    print(currentarray)
-            #    plt.scatter(x,y, s=10, color = "y")
-            #    #ax.scatter(val_a[-1], val_b[-1],val_c[-1])
-            #    index += 1
-            #    #insert the timing
-            #    plt.pause(0.00000000000001)
-            #    currentarray.append([x, y])
-            # elif index>5:
-            #    plt.clf()
-            #    #plt.axis([0.5,5,0.5,5])
-            #    for j in range(5):              #change value to match clusters
-            #        plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
-            #    currentarray[index%5] = ([x, y])
-            #    print(currentarray)
-            #    for i in currentarray:
-            #        plt.scatter(i[0],i[1], s=10, color = "y")
-            #    plt.pause(0.0001)
-            #    index += 1
-            #line = []
-            
-            
-                   
-            # 
-            # if index%n==0:
-            #     print(a)
-            #     x = float(a[0])
-            #     y = float(a[1])
-            #     all_data.append([x,y])
-            #     plt.scatter(x,y,s=40, color = "k")
-            #     plt.pause(0.00000001)
-            #     time2 = time.time()
-            # index += 1
-            # line = []
-    #n = int(n+index/100)
-    
-ser.close()
+#             
+#             
+#             # if index<=5:
+#             #    print(currentarray)
+#             #    plt.scatter(x,y, s=10, color = "y")
+#             #    #ax.scatter(val_a[-1], val_b[-1],val_c[-1])
+#             #    index += 1
+#             #    #insert the timing
+#             #    plt.pause(0.00000000000001)
+#             #    currentarray.append([x, y])
+#             # elif index>5:
+#             #    plt.clf()
+#             #    #plt.axis([0.5,5,0.5,5])
+#             #    for j in range(5):              #change value to match clusters
+#             #        plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+#             #    currentarray[index%5] = ([x, y])
+#             #    print(currentarray)
+#             #    for i in currentarray:
+#             #        plt.scatter(i[0],i[1], s=10, color = "y")
+#             #    plt.pause(0.0001)
+#             #    index += 1
+#             #line = []
+#             
+#             
+#                    
+#             # 
+#             # if index%n==0:
+#             #     print(a)
+#             #     x = float(a[0])
+#             #     y = float(a[1])
+#             #     all_data.append([x,y])
+#             #     plt.scatter(x,y,s=40, color = "k")
+#             #     plt.pause(0.00000001)
+#             #     time2 = time.time()
+#             # index += 1
+#             # line = []
+#     #n = int(n+index/100)
+#     
