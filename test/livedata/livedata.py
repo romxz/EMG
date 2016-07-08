@@ -28,7 +28,7 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 
 """ 2. retrieving serial data """
 
-ser = serial.Serial(port='COM10',baudrate=300,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=0)
+ser = serial.Serial(port='COM10',baudrate=9600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=None)
 
 """ 3. initializing starting variables """
 
@@ -40,11 +40,11 @@ colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'Brown', 'ForestGreen']
 
 """ 4. initializing plot and time """
 
-#plt.ion()
+fig0 = plt.figure(0)
+plt.ion()
 #plt.axis([0.5,5,0.5,5])
 time1 = time.time()
 time2 = time.time()
-
 
 """ B. INITIAL DATA COLLECTION AND ANALYSIS"""
 
@@ -52,7 +52,7 @@ time2 = time.time()
 """ 1. starting the loop """
 
 
-while time2 - time1 < 30:       #can change time (seconds)
+while time2 - time1 < 20:       #can change time (seconds)
        
     for c in ser.readline():
         if not(c == 13):
@@ -64,10 +64,9 @@ while time2 - time1 < 30:       #can change time (seconds)
             a = a.split(",")
             a = ([x for x in a if x])
             
-            
-            if index%4==0:
-                
-                time100 = time.time()
+            if index%3==0:
+                print(a)
+                #time100 = time.time()
                 x = float(a[0])
                 y = float(a[1])
                 all_data.append([x,y])
@@ -75,7 +74,7 @@ while time2 - time1 < 30:       #can change time (seconds)
                 plt.scatter(x,y,s=10, color = "y")
                 plt.pause(0.000000001)
                 
-                time101 = time.time()
+                #time101 = time.time()
                 #print ("FPS:" + str(1/(time101-time100)))
                     
             index += 1
@@ -115,7 +114,7 @@ alldata = np.asarray(alldata)
 cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
     alldata, 5, 2, error=0.0005, maxiter=10000, init=None, seed=None) #second par is clusters
 cluster_membership = np.argmax(u, axis=0)
-print(cluster_membership)
+#print(cluster_membership)
 
 """ 4. plotting the points according to membership + plotting centroids """
 
@@ -127,21 +126,22 @@ for j in range(5):              #change depending on number clusters
     
 """ 5. adding line between centroids """
 
-"""for point in cntr:
+for point in cntr:
     for point2 in cntr:
-        plt.plot([point[0], point2[0]], [point[1], point2[1]],"-b")"""
+        plt.plot([point[0], point2[0]], [point[1], point2[1]],"-b")
         
 """ 6. saving the figure as a png file """
 
-plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\figures' + num + '.png')
+plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\fig' + num + '.png')
         
 """ 7. resetting the plot with only centroids """
 
-plt.clf()
+fig1 = plt.figure(1)
 for j in range(5):              #change value to match clusters
     plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
 
 """ C. SECOND LOOP (RUNS INDEFINITELY) """
+
 
 index = 0 
 while True:  
@@ -150,13 +150,15 @@ while True:
         if not(c == 13):
             line.append(chr(c)) 
         elif (c == 13):
-            a = ("".join(str(x) for x in line))
-            a = a.replace("\n", ",")
-            a = a.split(",")
-            a = ([x for x in a if x])
-            x = float(a[0])
-            y = float(a[1])
             if index%3==0:
+                a = ("".join(str(x) for x in line))
+                a = a.replace("\n", ",")
+                a = a.split(",")
+                a = ([x for x in a if x])
+                x = float(a[0])
+                y = float(a[1])
+            
+                print(a)
                 x = float(a[0])
                 y = float(a[1])
                 all_data.append([x,y])

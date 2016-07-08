@@ -13,14 +13,11 @@ from matplotlib import animation
 
 fig = plt.figure(2)
 ax = plt.axes(xlim=(0, 1), ylim=(0, 1))
-scat = ax.scatter([], [], s=60)
-def init():
-    scat.set_offsets([])
-    return scat,
+scat = ax.scatter([], [])
 
 def animate(i):
-    scat.set_offsets(val_a[:i], val_b[:i])
-    return scat,
+    ax.scatter(val_a[:i], val_b[:i])
+    return scat
 
 #this will store the line
 line = []
@@ -39,8 +36,8 @@ while index<50:
     val_a.append(random.randint(0,100))
     val_b.append(random.randint(0,100))
     val_c.append(random.randint(0,100))
-    anim = animation.FuncAnimation(fig, animate, init_func=init, frames=1000, 
-                               interval=2, blit=False, repeat=False)
+    #anim = animation.FuncAnimation(fig, animate, frames=100, 
+                            #interval=0.01, blit=False, repeat=False)
     plt.scatter(val_a[-1], val_b[-1], s=10, color = "y")
     
     #ax.scatter(val_a[-1], val_b[-1],val_c[-1])
