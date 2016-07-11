@@ -31,7 +31,7 @@ plt.axis([0,100,0,100])
 
 time1 = time.time()
 index = 0
-while index<50:
+while index<5:
     
     val_a.append(random.randint(0,100))
     val_b.append(random.randint(0,100))
@@ -54,8 +54,10 @@ print (200/(time2-time1))
     #plt.pause(0.1)
 alldata = [val_a,val_b]
 alldata = np.asarray(alldata)
+print (alldata)
 cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
     alldata, 4, 2, error=0.0005, maxiter=10000, init=None, seed=None)
+print(u)
 cluster_membership = np.argmax(u, axis=0)
 for j in range(4):
     for i in range(len(cluster_membership)):
@@ -63,12 +65,20 @@ for j in range(4):
             plt.plot(val_a[i], val_b[i], '.', color = colors[j])
     plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
 
+
+#v = fuzz.cluster.cmeans_predict(alldata, cntr, 2, error = 0.0005, maxiter = 10000)
+#print("hi")
+#print(v[0])
+#print(v[0] == u)
+#cluster_membership2 = np.argmax(v[0], axis=0)
+#print(cluster_membership2)
+
+
 for point in cntr:
     for point2 in cntr:
         plt.plot([point[0], point2[0]], [point[1], point2[1]],"-b")
 
 plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\figures\\test3.png')
-  
   
         
 plt.clf()
@@ -88,7 +98,11 @@ while index<1000:
     val_c.append(random.randint(0,100))
     
     if index<=10:
-        plt.scatter(val_a[-1], val_b[-1], s=10, color = "y")
+        a = np.asarray([[val_a[-1]], [val_b[-1]]])
+        v = fuzz.cluster.cmeans_predict(a, cntr, 2, error = 0.0005, maxiter = 10000)
+        cluster_num = np.argmax(v[0], axis = 0)
+        cluster_num = int(cluster_num)
+        plt.scatter(val_a[-1], val_b[-1], s=10, color = colors[cluster_num])
         #ax.scatter(val_a[-1], val_b[-1],val_c[-1])
         index += 1
         #insert the timing
@@ -99,10 +113,14 @@ while index<1000:
         plt.axis([0,100,0,100])
         for j in range(4):              #change value to match clusters
             plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
-        currentarray[index%5] = ([val_a[-1], val_b[-1]])
-        print(currentarray)
+            currentarray[index%5] = ([val_a[-1], val_b[-1]])
         for i in currentarray:
-            plt.scatter(i[0],i[1], s=10, color = "y")
+            #plt.scatter(i[0],i[1], s=10, color = "y")
+            a = np.asarray([[i[0]], [i[1]]])
+            v = fuzz.cluster.cmeans_predict(a, cntr, 2, error = 0.0005, maxiter = 10000)
+            cluster_num = np.argmax(v[0], axis = 0)
+            cluster_num = int(cluster_num)
+            plt.scatter(i[0], i[1], s=10, color = colors[cluster_num])
         plt.pause(0.0001)
         index += 1
 """        
