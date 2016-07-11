@@ -52,7 +52,7 @@ time2 = time.time()
 """ 1. starting the loop """
 
 index = 0
-while time2 - time1 < 120:       #can change time (seconds)
+while time2 - time1 < 20:       #can change time (seconds)
     if index>=20:
         ser.reset_input_buffer()
         ser.reset_output_buffer()
@@ -145,7 +145,7 @@ for j in range(5):              #change value to match clusters
 """ C. SECOND LOOP (RUNS INDEFINITELY) """
 
 
-while time2 - time1 < 6:       #can change time (seconds)
+while True:       #can change time (seconds)
     ser.reset_input_buffer()
     ser.reset_output_buffer()
     for c in ser.readline():
@@ -158,7 +158,6 @@ while time2 - time1 < 6:       #can change time (seconds)
             a = ([x for x in a if x])
             if ((len(a) == 2)):
                 if (len(a[0])>=4 & len(a[1])>=4):
-                    print(a)
                     #time100 = time.time()
                     x = float(a[0])
                     y = float(a[1])
@@ -167,8 +166,7 @@ while time2 - time1 < 6:       #can change time (seconds)
                     v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
                     cluster_num = np.argmax(v[0], axis = 0)
                     cluster_num = int(cluster_num)
-                    print(a)
-                    plt.scatter(x,y,s=40, color = "cluster_num")
+                    plt.scatter(x,y,s=40, c = colors[cluster_num])
                     plt.pause(0.000000001)
                     plt.clf()
                     #plt.remove()
