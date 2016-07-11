@@ -97,7 +97,7 @@ with open('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + n
     for i in all_data:
         writer.writerow(i)
 
-print("file saved as: " + 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + str(num) + '.csv')
+ 
 
 """ 3. setting up and running the fuzzy c means algorithm """
 
@@ -106,7 +106,7 @@ y_val = []
 for i in all_data:
     x_val.append(i[0])
     y_val.append(i[1])
-alldata = [x_val[2:len(x_val)], y_val[2:len(y_val)]]
+alldata = [x_val[1:len(x_val)], y_val[1:len(y_val)]]
 x_val = alldata[0];
 y_val = alldata[1];
 alldata = np.asarray(alldata)
@@ -178,9 +178,10 @@ while time2 - time1 < 6:       #can change time (seconds)
             line = []
 
 
-index = 0 
+
 while True:  
-    n=3
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
     for c in ser.readline():
         if not(c == 13):
             line.append(chr(c)) 
@@ -206,7 +207,6 @@ while True:
                 #plt.axis([0,100,0,100])
                 for j in range(5):              #change value to match clusters
                     plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
-            index += 1
             line = []
             
 
