@@ -162,8 +162,13 @@ while time2 - time1 < 6:       #can change time (seconds)
                     #time100 = time.time()
                     x = float(a[0])
                     y = float(a[1])
-                
-                    plt.scatter(x,y,s=40, color = "k")
+
+                    a_array = np.asarray([[x], [y]])
+                    v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
+                    cluster_num = np.argmax(v[0], axis = 0)
+                    cluster_num = int(cluster_num)
+                    print(a)
+                    plt.scatter(x,y,s=40, color = "cluster_num")
                     plt.pause(0.000000001)
                     plt.clf()
                     #plt.remove()
@@ -178,7 +183,7 @@ while time2 - time1 < 6:       #can change time (seconds)
             line = []
 
 
-
+"""
 while True:  
     ser.reset_input_buffer()
     ser.reset_output_buffer()
@@ -210,7 +215,7 @@ while True:
             line = []
             
 
-        
+        """
 # """ 7. resetting the plot with only centroids """
 # 
 # #fig1 = plt.figure(0)

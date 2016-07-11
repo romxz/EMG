@@ -54,10 +54,10 @@ print (200/(time2-time1))
     #plt.pause(0.1)
 alldata = [val_a,val_b]
 alldata = np.asarray(alldata)
-print (alldata)
+
 cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
     alldata, 4, 2, error=0.0005, maxiter=10000, init=None, seed=None)
-print(u)
+print(cntr)
 cluster_membership = np.argmax(u, axis=0)
 for j in range(4):
     for i in range(len(cluster_membership)):
