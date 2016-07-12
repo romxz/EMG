@@ -18,6 +18,12 @@ int max2 = 300;
 void setup() {
 
   Serial.begin(9600); //This line tells the Serial port to begin communicating at 9600 bauds
+  pinMode(A0, INPUT);
+  digitalWrite(A0, LOW);
+  pinMode(A4, INPUT);
+  digitalWrite(A4, LOW);
+  pinMode(A5, INPUT);
+  digitalWrite(A5, LOW);
 }
 
 int counterArray = 0, counterRMS = 0;
@@ -51,7 +57,7 @@ double avgW(double a[], int index) {
   double averageW = numWindow * a[index];
   for (int i = 1; i < numWindow; i++) {
     index = index - 1;
-    if (index < 0){
+    if (index < 0) {
       index = numWindow - 1;
     }
     averageW = averageW + (numWindow - i) * a[index];
@@ -95,9 +101,10 @@ void loop() {
   //rmsMOD1 = 0.8 * maxi(arrayRMS1) + 0.1 * mini(arrayRMS1) + 0.3 * arrayRMS1[counterArray];
   //rmsMOD2 = 0.8 * maxi(arrayRMS2) + 0.2 * arrayRMS2[counterArray];
   //rmsMOD3 = 0.8 * maxi(arrayRMS3) + 0.2 * arrayRMS3[counterArray];
+  rmsMOD1 = avgW(arrayRMS1, counterArray);
   rmsMOD2 = avgW(arrayRMS2, counterArray);
   rmsMOD3 = avgW(arrayRMS3, counterArray);
-  
+
   //if (rmsMOD2 > max2){
   //  rmsMOD2 = max2;
   //}
@@ -105,16 +112,21 @@ void loop() {
   //if (rmsMOD3 > max1){
   //  rmsMOD3 = max1;
   //}
+  logrmsMOD1 = log(rmsMOD1);
   logrmsMOD2 = log(rmsMOD2);
   logrmsMOD3 = log(rmsMOD3);
-  if (logrmsMOD2 < -1){
+  if (logrmsMOD2 < -1) {
     logrmsMOD2 = -1;
   }
-  if (logrmsMOD3 < -1){
+  if (logrmsMOD3 < -1) {
     logrmsMOD3 = -1;
   }
+  if (logrmsMOD1 < -1) {
+    logrmsMOD1 = -1;
+  }
   
-  //Serial.print(rmsMOD1);
+
+  //Serial.print(logrmsMOD1);
   //Serial.print(",");
   Serial.print(logrmsMOD2);
   Serial.print(",");
