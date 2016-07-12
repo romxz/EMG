@@ -35,17 +35,17 @@ print ("connected to: " + ser.portstr)
 """ 3. number of sensors """
 
 num_sensors = int(input("Number of sensors: "))
-num_dims = int(input("Number of plotting dimensions: "))
+num_dim = int(input("Number of plotting dimensions: "))
 
 """ 3. initializaing starting variables and functions"""
 
 """following function converts a 3D list to a 2D one"""
-def threeDtotwoD(a): #a = 2-dimensional matrix (with 3 rows corresponding to 3D)
+def threeDtotwoD(array): #array = 2D matrix (3 rows, N columns (number of samples))
     new_list = [[],[]]
-    for i in range(len(a[0])):
-        a = float(a[0][i])
-        b = float(a[1][i])
-        c = float(a[2][i])  
+    for i in range(len(array[0])):
+        a = float(array[0][i])
+        b = float(array[1][i])
+        c = float(array[2][i])  
         f = (np.sqrt(3.0)/2)*(a-b)
         g = (1/2)*(2*c-a-b)
         r = np.sqrt(a**2 + b**2 + c**2)
@@ -56,6 +56,38 @@ def threeDtotwoD(a): #a = 2-dimensional matrix (with 3 rows corresponding to 3D)
         new_list[1].append(k)
     return new_list
         
+"""following function converts a 3D list to another 3D one"""
+def threeDconv(array): #array = 2D matrix (3 rows, N columns)
+    new_list = [[],[],[]]
+    for i in range(len(array[0])):
+        a = float(array[0][i])
+        b = float(array[1][i])
+        c = float(array[2][i])  
+        f = (np.sqrt(3.0)/2)*(a-b)
+        g = (1/2)*(2*c-a-b)
+        h = np.sqrt(a**2 + b**2 + c**2)
+        s = np.sqrt(f**2 + g**2 + 1)
+        x = (r/s)*f
+        y = (r/s)*g
+        new_list[0].append(x)
+        new_list[1].append(y)
+        new_list[2].append(h)
+    return new_list
+
+"""following function converts a 4D list into a 3D one"""
+def fourDtothreeD(array) #array = 2D matrix (4 rows, N columns)
+    new_list = [[],[],[]]
+    for i in range(len(array[0])):
+        a = float(array[0][i])
+        b = float(array[1][i])
+        c = float(array[2][i]) 
+        d = float(array[3][i])
+        x = a - (1/3)*(b+c+d)
+        y = (np.sqrt(2)/3)*(2*b-c-d)
+        z = (np.sqrt(2/3))*(c-d)
+        new_list[0].append(x)
+        new_list[1].append(y)
+        new_list[2].append(z) 
 
 line = []
 index = 0
@@ -78,7 +110,6 @@ elif num_sensors == 4:
 
 start_time = time.time()
 end_time = time.time()
-all_data_proj = []
 
 """ B. INITIAL DATA COLLECTION AND ANALYSIS """
 
@@ -103,7 +134,7 @@ while end_time - start_time < 120:    #time in seconds
                         x = float(a[0])
                         y = float(a[1])
                         all_data.append([x,y])
-                        plt.scatter(x,y,s=10, color = "y")
+                        plt.scatter(x,y,s=10, c = "y")
                         plt.pause(0.00001)
             elif num_sensors == 3:
                 if num_dim == 3:
@@ -113,33 +144,26 @@ while end_time - start_time < 120:    #time in seconds
                             y = float(a[1])
                             z = float(a[2])
                             all_data.append([x,y,z])
-                            ax.scatter(x,y,s=10, c = "y")
+                            ax.scatter(x,y,z, s=10, c = "y")
                             plt.pause(0.00001)
                 elif num_dim == 2:
+                    all_data_proj = [[],[]]
                     if ((len(a) == 3)):
                         if (len(a[0])>=4 & len(a[1])>=4 & len(a[2])>=4):
-                            #a = float(a[0])
-                            #b = float(a[1])
-                            #c = float(a[2])
                             x = float(a[0])
                             y = float(a[1])
                             z = float(a[2])
                             all_data.append([x,y,z])
                             converted_xyz = threeDtotwoD([[x],[y],[z]])
-                            #f = (np.sqrt(3.0)/2)*(a-b)
-                            #g = (1/2)*(2*c-a-b)
-                            #r = np.sqrt(a**2 + b**2 + c**2)
-                            #s = np.sqrt(f**2 + g**2 + 1)
-                            #j = (r/s)*f
-                            #k = (r/s)*g
                             all_data_proj[0].extend(converted_xyz[0])
-                            all_data_proj[1].extend(converted_xyz[0])
+                            all_data_proj[1].extend(converted_xyz[1])
                             j = converted_xyz[0][0]
                             k = converted_xyz[1][0]
-                            plt.scatter(j,k,s=10, color = "y")
+                            plt.scatter(j,k,s=10, c = "y")
                             plt.pause(0.00001)
                     
             elif num_sensors == 4:
+                all_data_proj = [[],[],[]]
                 if ((len(a) == 4)):
                     if (len(a[0])>=4 & len(a[1])>=4 & len(a[2])>=4 & len(a[3])>=4):
                         x = float(a[0])
@@ -147,9 +171,17 @@ while end_time - start_time < 120:    #time in seconds
                         z = float(a[2])
                         w = float(a[3])
                         all_data.append([x,y,z,w])
-                        ##NOT SURE WHAT TO PLOT HERE YET
-                        #ax.scatter(x,y,s=10, c = "y")
-                        #plt.pause(0.00001)
+                        converted_xyzw = fourDtothreeD([[x],[y],[z],[w]])
+                        all_data_proj[0].extend(converted_xyz[0])
+                        all_data_proj[1].extend(converted_xyz[1])
+                        all_data_proj[2].extend(converted_xyz[2])
+                        j = converted_xyz[0][0]
+                        k = converted_xyz[1][0]
+                        l = converted_xyz[2][0]
+                        ax.scatter(j,k,l,s = 10, c = "y")
+                        plt.pause(0.00001)
+                        
+                        
         line = []
     index += 1
     end_time = time.time()
@@ -194,25 +226,31 @@ elif (num_sensors == 3):
                     ax.scatter(alldata[0][i], alldata[1][i], alldata[2][i],c = colors[j], s = 20, marker = ".")
             ax.scatter(cntr[j][0], cntr[j][1], cntr[j][2], c = colors[j], marker = "s", s = 50)
     elif num_dim == 2:
+        cntr = np.transpose(np.array(threeDtotwoD(cntr)))
         for j in range(5):      #change depending on number clusters
-            cntr = threeDtotwoD(cntr)
             for i in range(len(cluster_membership)):
                 if cluster_membership[i] == j:
-                    plt.scatter(all_data_conv[0][i], all_data_conv[1][i], color = colors[j], s= 20, marker = ".")
+                    plt.scatter(all_data_proj[0][i], all_data_proj[1][i], c = colors[j], s= 20, marker = ".")
             plt.scatter(cntr[j][0], cntr[j][1], color = colors[j], s= 50, marker = "s")
-##
-# elif (num_sensors == 4):
-#     for j in range(5):
-#         for i in range(len(cluster_membership)):
-#             if cluster_membership[i] == j:
-#                 ~~~~
-#     ~~~~
+
+elif (num_sensors == 4):
+    cntr = np.transpose(np.array(fourDtothreeD(cntr)))
+    for j in range(5):
+        for i in range(len(cluster_membership)):
+            if cluster_membership[i] == j:
+                ax.scatter(all_data_proj[0][i], all_data_proj[1][i], all_data_proj[2][i],c = colors[j], s = 20, marker = ".")
+        ax.scatter(cntr[j][0], cntr[j][1], cntr[j][2], c = colors[j], marker = "s", s = 50)    
 
 """ 5. adding line between centroids """
 
-for point in cntr:
-   for point2 in cntr:
-       ax.plot([point[0], point2[0]], [point[1], point2[1]], [point[2], point2[2]],"-b")
+if num_dim == 3:
+    for point in cntr:
+        for point2 in cntr:
+            ax.plot([point[0], point2[0]], [point[1], point2[1]], [point[2], point2[2]],"-b")
+if num_dim == 2:
+    for point in cntr:
+        for point2 in cntr:
+            plt.plot([point[0], point2[0]], [point[1], point2[1]],"-b")
        
 """ 6. saving figure as a png file """
     
@@ -221,19 +259,16 @@ print ("figure saved as: "+ 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\cs
 
 """ 7. resetting the plot with only centroids """
 
-if num_sensors == 2:
-    fig0 = plt.figure(0)
-elif num_sensors == 3:
-    fig0 = plt.figure(0)
-    ax = plt.axes(projection = "3d")
-elif num_sensors == 4:
-    fig0 = plt.figure(0)
+if num_dim == 2:
+    fig1 = plt.figure(1)
+if num_dim == 3:
+    fig1 = plt.figure(1)
     ax = plt.axes(projection = "3d")
 
 for j in range(5):              #change value to match clusters
-    if num_sensors == 2:
+    if num_dim == 2:
         plt.scatter(cntr[j][0], cntr[j][1], c = colors[j], marker = "s", s = 50)
-    elif num_sensors ==3:
+    elif num_dim == 3:
         ax.scatter(cntr[j][0], cntr[j][1], cntr[j][2], c = colors[j], marker = "s", s = 50)
         
 
@@ -295,7 +330,7 @@ while True:
                             converted_xyz = threeDtotwoD([[x],[y],[z]])
                             j = converted_xyz[0][0]
                             k = converted_xyz[1][0]
-                            plt.scatter(j,k,s=10, color = colors[cluster_num])
+                            plt.scatter(j,k,s=10, c = colors[cluster_num])
                             plt.pause(0.00001)
                             plt.clf()
                             for j in range(5):    #change value to match clusters
@@ -312,13 +347,16 @@ while True:
                         a_array = np.asarray([[x], [y], [z],[w]])
                         v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
                         cluster_num = int(np.argmax(v[0], axis = 0))
-                        #print(a)
-                        ###NOT SURE WHAT TO PLOT HERE
-                        #ax.scatter(x,y,z, s=40, color = colors[cluster_num])
-                        #plt.pause(0.00001)
-                        #plt.clf()
-                        #for j in range(5):    #change value to match clusters
-                        #ax.scatter(cntr[j][0], cntr[j][1], cntr[j][2], c = colors[j], marker = "s", s = 50)
+                        converted_xyzw = fourDtothreeD([[x],[y],[z],[w]])
+                        j = converted_xyz[0][0]
+                        k = converted_xyz[1][0]
+                        l = converted_xyz[2][0]
+                        ax.scatter(j,k,l,s = 10, c = colors[cluster_num])
+                        plt.pause(0.00001)
+                        plt.clf()
+                        for j in range(5):    #change value to match clusters
+                            ax.scatter(cntr[j][0], cntr[j][1], cntr[j][2], c = colors[j], marker = "s", s = 50)
+                        
                         
         line = []
 

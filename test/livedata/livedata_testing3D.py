@@ -36,7 +36,8 @@ alldata = np.asarray(alldata)
 cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
     alldata, 4, 2, error=0.0005, maxiter=10000, init=None, seed=None)
 cluster_membership = np.argmax(u, axis=0)
-print(cluster_membership)
+print(cntr)
+print(cntr[1][0])
 for j in range(4):
     for i in range(len(cluster_membership)):
         if cluster_membership[i] == j:
