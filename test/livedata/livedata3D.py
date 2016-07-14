@@ -21,7 +21,7 @@ import math
 
 #getting serial data
 
-ser = serial.Serial(port='COM10',baudrate=9600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=0)
+ser = serial.Serial(port='COM5',baudrate=9600,parity=serial.PARITY_NONE,stopbits=serial.STOPBITS_ONE,bytesize=serial.EIGHTBITS,timeout=0)
 
 #initializing variables
 
@@ -57,11 +57,11 @@ while time2 - time1 < 120:
             a = a.split(",")
             a = ([x for x in a if x])
             if index>=2:
-                x = math.log(float(a[0])+0.05)
-                y = math.log(float(a[1])+0.05)
+                x = float(a[0])
+                y = float(a[1])
                 #z needs to be initialized to something (probably a[2] but needs testing)
                 #z = random.randint(0,10)
-                z = math.log(float(a[2])+0.05)
+                z = float(a[2])
                 all_data.append([x,y,z])
                 print([x,y,z])
                 ax.scatter(x,y,z, c='y', s=10, marker = "o")

@@ -42,7 +42,7 @@ colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'Brown', 'ForestGreen']
 
 fig0 = plt.figure(0)
 plt.ion()
-#plt.axis([0.5,5,0.5,5])
+plt.axis([0.5,5,0.5,5])
 time1 = time.time()
 time2 = time.time()
 
@@ -52,7 +52,7 @@ time2 = time.time()
 """ 1. starting the loop """
 
 index = 0
-while time2 - time1 < 20:       #can change time (seconds)
+while time2 - time1 < 30:       #can change time (seconds)
     if index>=20:
         ser.reset_input_buffer()
         ser.reset_output_buffer()
@@ -64,6 +64,7 @@ while time2 - time1 < 20:       #can change time (seconds)
             a = a.replace("\n", ",")
             a = a.split(",")
             a = ([x for x in a if x])
+            print(a)
             if ((len(a) == 2)):
                 if (len(a[0])>=4 & len(a[1])>=4):
                     time100 = time.time()

@@ -49,3 +49,18 @@ for point in cntr:
    for point2 in cntr:
        ax.plot([point[0], point2[0]], [point[1], point2[1]], [point[2], point2[2]],"-b")
 print(cntr)
+
+fig1 = plt.figure(1)
+ax = plt.axes(projection='3d')
+index = 0
+while True:
+    plt.clf()
+    val_a.append(random.randint(0,100))
+    val_b.append(random.randint(0,100))
+    val_c.append(random.randint(0,100))
+    #plt.scatter(val_a[-1], val_b[-1], s=10, color = "y")
+    ax.scatter(val_a[-1], val_b[-1],val_c[-1])
+    print(val_a[-1])
+    index += 1
+    #insert the timing
+    plt.pause(0.00000000000001)
