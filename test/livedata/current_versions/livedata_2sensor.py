@@ -42,7 +42,7 @@ colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'Brown', 'ForestGreen']
 
 fig0 = plt.figure(0)
 plt.ion()
-plt.axis([0.5,5,0.5,5])
+#plt.axis([0.5,5,0.5,5])
 time1 = time.time()
 time2 = time.time()
 
@@ -52,7 +52,7 @@ time2 = time.time()
 """ 1. starting the loop """
 
 index = 0
-while time2 - time1 < 30:       #can change time (seconds)
+while time2 - time1 < 10:       #can change time (seconds)
     if index>=20:
         ser.reset_input_buffer()
         ser.reset_output_buffer()
@@ -64,10 +64,10 @@ while time2 - time1 < 30:       #can change time (seconds)
             a = a.replace("\n", ",")
             a = a.split(",")
             a = ([x for x in a if x])
-            print(a)
+            #print(a)
             if ((len(a) == 2)):
                 if (len(a[0])>=4 & len(a[1])>=4):
-                    time100 = time.time()
+                    #time100 = time.time()
                     x = float(a[0])
                     y = float(a[1])
                     all_data.append([x,y])
@@ -75,8 +75,8 @@ while time2 - time1 < 30:       #can change time (seconds)
                     plt.scatter(x,y,s=10, color = "y")
                     plt.pause(0.000000001)
                         
-                    time101 = time.time()
-                    print ("FPS:" + str(1/(time101-time100)))
+                    #time101 = time.time()
+                    #print ("FPS:" + str(1/(time101-time100)))
                         
         #index += 1
             line = []
@@ -182,79 +182,5 @@ while True:       #can change time (seconds)
             line = []
 
 
-"""
-while True:  
-    ser.reset_input_buffer()
-    ser.reset_output_buffer()
-    for c in ser.readline():
-        if not(c == 13):
-            line.append(chr(c)) 
-        elif (c == 13):
-            if index%3==0:
-                a = ("".join(str(x) for x in line))
-                a = a.replace("\n", ",")
-                a = a.split(",")
-                a = ([x for x in a if x])
-                x = float(a[0])
-                y = float(a[1])
-                a_array = np.asarray([[x], [y]])
-                v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
-                cluster_num = np.argmax(v[0], axis = 0)
-                cluster_num = int(cluster_num)
-                print(a)
-                #all_data.append([x,y])
-                plt.scatter(x,y,s=40, color = colors[cluster_num])
-                plt.pause(0.00000001)
-                time2 = time.time()
-                plt.clf()
-                #plt.remove()
-                #plt.axis([0,100,0,100])
-                for j in range(5):              #change value to match clusters
-                    plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
-            line = []
-            
-
-        """
-# """ 7. resetting the plot with only centroids """
-# 
-# #fig1 = plt.figure(0)
-# plt.clf()
-# for j in range(5):              #change value to match clusters
-#     plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
-# print("yo")
-# 
-# """ C. SECOND LOOP (RUNS INDEFINITELY) """
-# 
-# 
-# index = 0 
-# while True:  
-#     ser.reset_input_buffer()
-#     ser.reset_output_buffer()
-#     for c in ser.readline():
-#         if not(c == 13):
-#             line.append(chr(c)) 
-#         elif (c == 13):
-#             a = ("".join(str(x) for x in line))
-#             a = a.replace("\n", ",")
-#             a = a.split(",")
-#             a = ([x for x in a if x])
-#                 
-#             
-#             if len(a) == 2:   
-#                 x = float(a[0])
-#                 y = float(a[1])
-#                 all_data.append([x,y])
-#                 plt.scatter(x,y,s=40, color = "k")
-#                 plt.pause(0.00000001)
-#                 time2 = time.time()
-#                 plt.clf()
-#                 #plt.remove()
-#                 #plt.axis([0,100,0,100])
-#                 for j in range(5):              #change value to match clusters
-#                     plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
-#             #index += 1
-#         line = []
-#             
-#             
     
 ser.close()

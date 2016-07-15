@@ -32,9 +32,9 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 ser = serial.Serial(port='COM10',baudrate=9600,timeout=None)
 
 """ 3. initializing starting variables """
-record_time = 105
+record_time = 5
 clusters = 7
-scale_left = 0
+scale_left = -1
 scale_right = 9
 converted = False
 
