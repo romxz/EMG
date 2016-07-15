@@ -27,6 +27,8 @@ def distance(x,y): #2 same size horizontal lists
 distance_limit = False #graph only if consecutive points exceed specific distance 
 epsilon = 0.000001
 
+cont_mode = False #graph continuously 
+
 """ 1. importing the relevant libraries """
 
 import serial
@@ -47,10 +49,16 @@ ser = serial.Serial(port='COM10',baudrate=9600,timeout=None)
 
 """ 3. initializing starting variables """
 
-time_run = 105
-clusters = 7
-left = 1
-right = 9
+time_run = 50
+clusters = 4
+left1 = -1
+right1 = 10
+left2 = -1
+right2 = 10
+left3 = -1
+right3 = 10
+left4 = -1
+right4 = 10
 
 print("connected to: " + ser.portstr)
 line = []           #storing the numbers until it reaches a space
@@ -60,9 +68,9 @@ colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k']
 
 """ 4. initializing plot and time """
 
-fig1, (ax1, ax2) = plt.subplots(1, 2, sharey=True, figsize = (16,8))
-ax1.axis([left,right,left,right])
-ax2.axis([left,right,left,right])
+fig1, (ax1, ax2) = plt.subplots(1, 2, figsize = (16,8))
+ax1.axis([left1,right1,left2,right2])
+ax2.axis([left3,right3,left4,right4])
 plt.ion()
 #plt.axis([0.5,5,0.5,5])
 time1 = time.time()
@@ -72,8 +80,64 @@ time2 = time.time()
 
 
 """ 1. starting the loop """
-
-index = 0
+list = []
+list_ind = 0
+while cont_mode:
+    
+#while time2 - time1 < time_run:       #can change time (seconds)
+    if index>=20:
+        ser.reset_input_buffer()
+        ser.reset_output_buffer()
+    for c in ser.readline():
+        if not(c == 13):
+            line.append(chr(c))
+        elif (c == 13):
+            a = ("".join(str(x) for x in line))
+            a = a.replace("\n", ",")
+            a = a.split(",")
+            a = ([x for x in a if x])
+            if ((len(a) == 4)):
+                #if (len(a[0])>=4 & len(a[1])>=4 & len(a[2])>4 & len(a[3])>4):
+                x1 = float(a[0])
+                y1 = float(a[1])
+                x2 = float(a[2])
+                y2 = float(a[3])
+                
+                if len(list) == 10:
+                    list[list_ind]=([x1,y1,x2,y2])
+                    for i in range(9):
+                        if (i==list_ind):
+                            ax1.scatter(list[i][0],list[i][1],s=40, color = "b")
+                            ax2.scatter(list[i][2],list[i][2],s=40, color = "b")
+                        else:
+                            ax1.scatter(list[i][0],list[i][1],s=20, color = "k")
+                            ax2.scatter(list[i][2],list[i][2],s=20, color = "k")
+                        plt.show()
+                    
+                    list_ind += 1
+                    
+                    if list_ind == 9:
+                        list_ind = 0
+                else:
+                    list.append([x1,y1,x2,y2])
+                    ax1.scatter(x1,y1,s=10, color = "y")
+                    ax2.scatter(x2,y2,s=10, color = "y")
+                #if (x1>left and x1<right and x2>left and x2<right and y1>left and y1<right and y2>left and y2<right):
+                
+                plt.pause(0.000000001)
+                
+                ax1.clear()
+                ax2.clear()
+                ax1.axis([left1,right1,left2,right2])
+                ax2.axis([left3,right3,left4,right4])                          
+                           
+                        
+        #index += 1
+            line = []
+         
+    index += 1
+    time2 = time.time()
+    
 while time2 - time1 < time_run:       #can change time (seconds)
     if index>=20:
         ser.reset_input_buffer()
@@ -106,15 +170,17 @@ while time2 - time1 < time_run:       #can change time (seconds)
                         ax2.scatter(x2,y2,s=10, color = "y")
                         plt.show()
                 else:
-                    ax1.scatter(x1,y1,s=10, color = "y")
-                    ax2.scatter(x2,y2,s=10, color = "y")
-                    plt.show()
+                    if (x1>left1 and x1<right1 and x2>left2 and x2<right2 and y1>left3 and y1<right3 and y2>left4 and y2<right4):
+                        ax1.scatter(x1,y1,s=10, color = "y")
+                        ax2.scatter(x2,y2,s=10, color = "y")
+                        plt.show()
                 plt.pause(0.000000001)
-                        
-                    
+                                           
+                           
                         
         #index += 1
             line = []
+         
     index += 1
     time2 = time.time()
     
@@ -169,9 +235,9 @@ print ("figure saved as: "+ 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\cs
 """ 7. resetting the plot with only centroids """
 
 fig2, (ax3, ax4) = plt.subplots(1, 2, sharey=True, figsize = (16,8))
-ax3.axis([left,right,left,right])
-ax4.axis([left,right,left,right])
-for j in range(5):              #change value to match clusters
+ax3.axis([left1,right1,left2,right2])
+ax4.axis([left3,right3,left4,right4])
+for j in range(clusters):              #change value to match clusters
     ax3.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
     ax4.plot(cntr[j][2], cntr[j][3], colors[j]+"s")
 
@@ -196,33 +262,34 @@ while True:       #can change time (seconds)
                 y1 = float(a[1])
                 x2 = float(a[2])
                 y2 = float(a[3])
-                a_array = np.asarray([[x1], [y1], [x2], [y2]])
-                v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
-                cluster_num = np.argmax(v[0], axis = 0)
-                cluster_num = int(cluster_num)
-                ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
-                ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
-                # if distance_limit:
-                #     if distance([x1,y1,x2,y2], all_data[-1])>epsilon:
-                #         ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
-                #         ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
-                # else:
-                #     ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
-                #     ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
-                plt.pause(0.000000001)
-                plt.pause(0.000000001)
-                ax3.clear()
-                ax4.clear()
-                ax3.axis([left,right,left,right])
-                ax4.axis([left,right,left,right])
-                #plt.remove()
-                #plt.axis([0,100,0,100])
-                for j in range(clusters):              #change value to match clusters
-                    ax3.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
-                    ax4.plot(cntr[j][2], cntr[j][3], colors[j]+"s")
+                if (x1>left1 and x1<right1 and x2>left2 and x2<right2 and y1>left3 and y1<right3 and y2>left4 and y2<right4):
+                    a_array = np.asarray([[x1], [y1], [x2], [y2]])
+                    v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
+                    cluster_num = np.argmax(v[0], axis = 0)
+                    cluster_num = int(cluster_num)
+                    ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
+                    ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
+                    # if distance_limit:
+                    #     if distance([x1,y1,x2,y2], all_data[-1])>epsilon:
+                    #         ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
+                    #         ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
+                    # else:
+                    #     ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
+                    #     ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
+                    plt.pause(0.000000001)
+                    plt.pause(0.000000001)
+                    ax3.clear()
+                    ax4.clear()
+                    ax3.axis([left1,right1,left2,right2])
+                    ax4.axis([left3,right3,left4,right4])
+                    #plt.remove()
+                    #plt.axis([0,100,0,100])
+                    for j in range(clusters):              #change value to match clusters
+                        ax3.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+                        ax4.plot(cntr[j][2], cntr[j][3], colors[j]+"s")
                         
-                        #time101 = time.time()
-                        #print ("FPS:" + str(1/(time101-time100)))
+                            #time101 = time.time()
+                            #print ("FPS:" + str(1/(time101-time100)))
                         
         #index += 1
             line = []

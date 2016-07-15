@@ -30,11 +30,17 @@ int counterArray = 0, counterRMS = 0;
 int amplifier3 = 2;
 float sensorVal[] = {0, 0, 0, 0};
 int numSamples = 150; //number of samples in a window of (0.1 second)
-const int numWindow = 15;
+const int numWindow = 50;
+double remainIndex = 0;
 const double delayTime = .1;
 //double arrayRMS1[10], arrayRMS2[10], arrayRMS3[10], arrayRMS4[10];
 double arrayRMS1[numWindow], arrayRMS2[numWindow], arrayRMS3[numWindow], arrayRMS4[numWindow];
 int numSensors = 4;
+double modulator4 = 0.3;
+double amplifier4 = 5;
+bool printnew = true;
+bool printrms = false;
+
 
 double maxi(double a[])
 {
@@ -58,15 +64,15 @@ double mini(double a[])
 }
 
 double avgW(double a[], int index) {
-  double averageW = numWindow * a[index];
+  double averageW = (numWindow + remainIndex) * a[index];
   for (int i = 1; i < numWindow; i++) {
     index = index - 1;
     if (index < 0) {
       index = numWindow - 1;
     }
-    averageW = averageW + (numWindow - i) * a[index];
+    averageW = averageW + (numWindow + remainIndex - i) * a[index];
   }
-  averageW = averageW / (numWindow * numWindow);
+  averageW = averageW / ((numWindow + remainIndex) * (numWindow + remainIndex));
   return averageW;
 }
 
@@ -177,8 +183,7 @@ void loop() {
          da4, db4, dc4, dd4,
          s4, pa4, pb4, pc4, pd4,
          fa4, fb4, fc4, fd4;
-  double modulator4 = 0.8;
-  double amplifier4 = 2;
+
   r4 = sqrt(logrmsMOD1 * logrmsMOD1 + logrmsMOD2 * logrmsMOD2 + logrmsMOD3 * logrmsMOD3 + logrmsMOD4 * logrmsMOD4);
   ra4 = sqrt(logrmsMOD2 * logrmsMOD2 + logrmsMOD3 * logrmsMOD3 + logrmsMOD4 * logrmsMOD4);
   rb4 = sqrt(logrmsMOD1 * logrmsMOD1 + logrmsMOD3 * logrmsMOD3 + logrmsMOD4 * logrmsMOD4);
@@ -197,15 +202,15 @@ void loop() {
   fb4 = modulator4 * logrmsMOD2 + (1 - modulator4) * pb4;
   fc4 = modulator4 * logrmsMOD3 + (1 - modulator4) * pc4;
   fd4 = modulator4 * logrmsMOD4 + (1 - modulator4) * pd4;
-
-  Serial.print(fa4);
-  Serial.print(",");
-  Serial.print(fb4);
-  Serial.print(",");
-  Serial.print(fc4);
-  Serial.print(",");
-  Serial.println(fd4);
-
+  if (printnew == true) {
+    Serial.print(fa4);
+    Serial.print(",");
+    Serial.print(fb4);
+    Serial.print(",");
+    Serial.print(fc4);
+    Serial.print(",");
+    Serial.println(fd4);
+  }
 
   /*
     Serial.print(pa3); //a3
@@ -224,7 +229,7 @@ void loop() {
     Serial.print(",");
     Serial.println((aa3+bb3+cc3)/3); //a5
   */
-  /*
+  if (printrms == true) {
     Serial.print(logrmsMOD1); //a2
     Serial.print(",");
     Serial.print(logrmsMOD2); //a3
@@ -232,7 +237,7 @@ void loop() {
     Serial.print(logrmsMOD3); //a4
     Serial.print(",");
     Serial.println(logrmsMOD4); //a5
-  */
+  }
 
   counterArray++;
   if (counterArray >= numWindow) {
