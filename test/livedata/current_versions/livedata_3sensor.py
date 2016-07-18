@@ -139,7 +139,7 @@ with open('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + n
 
 alldata = np.transpose(np.asarray(all_data[1:]))
 cntr, u, u0, d, jm, p, fpc = fuzz.cluster.cmeans(
-    alldata, clusters, 2, error=0.0005, maxiter=10000, init=None, seed=None) #second par is clusters
+    alldata, clusters, 2, error=0.0005, maxiter=10000, init=None, seed=None) 
 cluster_membership = np.argmax(u, axis=0)
 #print(cluster_membership)
 
@@ -159,8 +159,8 @@ for j in range(clusters):              #change depending on number clusters
 """        
 """ 6. saving the figure as a png file """
 
-plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\fig' + num + '.png')
-print ("figure saved as: "+ 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\csvfiles\\fig' + num + '.png')
+plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\3Dfig' + num + '.png')
+print ("figure saved as: "+ 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\csvfiles\\3Dfig' + num + '.png')
 
         
 """ 7. resetting the plot with only centroids """
@@ -198,7 +198,6 @@ while index<500:       #can change time (seconds)
             a = a.split(",")
             a = ([x for x in a if x])
             if ((len(a) == 3)):
-                #time100 = time.time()
                 x = float(a[0])
                 y = float(a[1])
                 z = float(a[2])
@@ -218,16 +217,13 @@ while index<500:       #can change time (seconds)
                     ax.set_zlim(scale_left,scale_right)
                     ax.scatter(x,y,z,s=40, c = colors[cluster_num])
                     plt.pause(0.000000001)
-                    #if index>=10:
                     ax.clear()
                     ax.set_xlim(scale_left,scale_right)
                     ax.set_ylim(scale_left,scale_right)
                     ax.set_zlim(scale_left,scale_right)
                     fig1 = plt.figure(1)
                     ax = plt.axes(projection = "3d")
-                    #plt.remove()
-                    #plt.axis([0,100,0,100])
-                    for j in range(clusters):              #change value to match clusters
+                    for j in range(clusters):            
                         ax.scatter(cntr[j][0], cntr[j][1], cntr[j][2], c = colors[j], marker = "s", s = 50)
 
                     #time101 = time.time()

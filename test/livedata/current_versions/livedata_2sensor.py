@@ -133,8 +133,8 @@ for j in range(5):              #change depending on number clusters
         
 """ 6. saving the figure as a png file """
 
-plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\fig' + num + '.png')
-print ("figure saved as: "+ 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\csvfiles\\fig' + num + '.png')
+plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\2Dfig' + num + '.png')
+print ("figure saved as: "+ 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\csvfiles\\2Dfig' + num + '.png')
         
         
 """ 7. resetting the plot with only centroids """
@@ -159,7 +159,6 @@ while True:       #can change time (seconds)
             a = ([x for x in a if x])
             if ((len(a) == 2)):
                 if (len(a[0])>=4 & len(a[1])>=4):
-                    #time100 = time.time()
                     x = float(a[0])
                     y = float(a[1])
 
@@ -170,9 +169,7 @@ while True:       #can change time (seconds)
                     plt.scatter(x,y,s=40, c = colors[cluster_num])
                     plt.pause(0.000000001)
                     plt.clf()
-                    #plt.remove()
-                    #plt.axis([0,100,0,100])
-                    for j in range(5):              #change value to match clusters
+                    for j in range(clusters):   
                         plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
                         
                         #time101 = time.time()

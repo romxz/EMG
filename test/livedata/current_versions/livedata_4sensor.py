@@ -227,14 +227,13 @@ for j in range(clusters):              #change depending on number clusters
         plt.plot([point[0], point2[0]], [point[1], point2[1]],"-b")"""
         
 """ 6. saving the figure as a png file """
-plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\figa' + num + '.png')
-#plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\fig1' + num + '.png')
-print ("figure saved as: "+ 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\csvfiles\\figa' + num + '.png')
+plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\4Dfig' + num + '.png')
+print ("figure saved as: "+ 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\csvfiles\\4Dfig' + num + '.png')
         
         
 """ 7. resetting the plot with only centroids """
 
-fig2, (ax3, ax4) = plt.subplots(1, 2, sharey=True, figsize = (16,8))
+fig1, (ax3, ax4) = plt.subplots(1, 2, sharey=True, figsize = (16,8))
 ax3.axis([left1,right1,left2,right2])
 ax4.axis([left3,right3,left4,right4])
 for j in range(clusters):              #change value to match clusters
@@ -244,7 +243,7 @@ for j in range(clusters):              #change value to match clusters
 """ C. SECOND LOOP (RUNS INDEFINITELY) """
 
 
-while True:       #can change time (seconds)
+while True:      
     ser.reset_input_buffer()
     ser.reset_output_buffer()
     for c in ser.readline():
@@ -256,8 +255,6 @@ while True:       #can change time (seconds)
             a = a.split(",")
             a = ([x for x in a if x])
             if ((len(a) == 4)):
-                #if (len(a[0])>=4 & len(a[1])>=4 & len(a[2])>4 & len(a[3])>4):
-                #time100 = time.time()
                 x1 = float(a[0])
                 y1 = float(a[1])
                 x2 = float(a[2])
@@ -269,29 +266,17 @@ while True:       #can change time (seconds)
                     cluster_num = int(cluster_num)
                     ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
                     ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
-                    # if distance_limit:
-                    #     if distance([x1,y1,x2,y2], all_data[-1])>epsilon:
-                    #         ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
-                    #         ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
-                    # else:
-                    #     ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
-                    #     ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
                     plt.pause(0.000000001)
                     plt.pause(0.000000001)
                     ax3.clear()
                     ax4.clear()
                     ax3.axis([left1,right1,left2,right2])
                     ax4.axis([left3,right3,left4,right4])
-                    #plt.remove()
-                    #plt.axis([0,100,0,100])
-                    for j in range(clusters):              #change value to match clusters
+                    for j in range(clusters):              
                         ax3.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
                         ax4.plot(cntr[j][2], cntr[j][3], colors[j]+"s")
                         
-                            #time101 = time.time()
-                            #print ("FPS:" + str(1/(time101-time100)))
-                        
-        #index += 1
+                            
             line = []
 
 
