@@ -15,9 +15,9 @@ int counterTime = 0;
 void loop() {
   // put your main code here, to run repeatedly:
   double wave1 = sq(sin(SPEED_CONSTANT * counterTime));
-  double wave2 = sq(sin(SPEED_CONSTANT * counterTime + ANGLE_PHASE));
-  double wave3 = sq(sin(SPEED_CONSTANT * counterTime + 2 * ANGLE_PHASE));
-  double wave4 = sq(sin(SPEED_CONSTANT * counterTime + 3 * ANGLE_PHASE));
+  double wave2 = sq(sin(SPEED_CONSTANT * counterTime + ANGLE_PHASE + wave1));
+  double wave3 = sq(sin(SPEED_CONSTANT * counterTime + 2 * ANGLE_PHASE * wave2));
+  double wave4 = sq(sin(SPEED_CONSTANT * counterTime + 3 * ANGLE_PHASE * wave2 + wave1));
   double sensorInput1 = SENSOR_1_READ * wave1 + SENSOR_2_READ * wave2 + SENSOR_3_READ * wave3 + SENSOR_4_READ * wave4;
   double sensorInput2 = SENSOR_2_READ * wave1 + SENSOR_3_READ * wave2 + SENSOR_4_READ * wave3 + SENSOR_1_READ * wave4;
   double sensorInput3 = SENSOR_3_READ * wave1 + SENSOR_4_READ * wave2 + SENSOR_1_READ * wave3 + SENSOR_2_READ * wave4;
@@ -35,6 +35,7 @@ void loop() {
     String toPrint = String(String(sensorInput1, 2) + "," + String(sensorInput2, 2) + "," + String(sensorInput3, 2) + "," + String(sensorInput4, 2));
     Serial.println(toPrint);
   }
+  delay(.1);
   counterTime++;
   if (counterTime > 62830) {
     counterTime = 0;
