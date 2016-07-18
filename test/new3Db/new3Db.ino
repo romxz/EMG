@@ -15,7 +15,7 @@
 
 // Array to store input reads from analog
 double sensorVal[] = {0, 0, 0, 0};
-#define DELAY_TIME_ANALOG 0.1 // time delay between analog samples
+#define DELAY_TIME_ANALOG 0.1 // time delay between analog samples in microseconds
 
 // Windowed Sampling parameters
 #define NUM_SAMPLES 150 // number of samples in a window of (0.1 second)
@@ -64,7 +64,7 @@ void setup() {
 
 // Takes weighted average, weight shape depending on factors defined at the top
 double window_weighted_avg(double a[], int index) {
-  double array_weighted_avg = a[index] * (AVG_WINDOW_SIZE + AVG_CONST_FACTOR + AVG_ROOT_FACTOR * sqrt(AVG_WINDOW_SIZE) + AVG_LIN_FACTOR * AVG_WINDOW_SIZE + AVG_SQ_FACTOR * sq(AVG_WINDOW_SIZE));
+  double array_weighted_avg = a[index] * (AVG_CONST_FACTOR + AVG_ROOT_FACTOR * sqrt(AVG_WINDOW_SIZE) + AVG_LIN_FACTOR * AVG_WINDOW_SIZE + AVG_SQ_FACTOR * sq(AVG_WINDOW_SIZE));
   for (int ishift = 1; ishift < AVG_WINDOW_SIZE; ishift++) {
     index = index - 1;
     if (index < 0) {
@@ -72,7 +72,7 @@ double window_weighted_avg(double a[], int index) {
     }
     array_weighted_avg = array_weighted_avg + a[index] * (AVG_CONST_FACTOR + AVG_ROOT_FACTOR * sqrt(AVG_WINDOW_SIZE - ishift) + AVG_LIN_FACTOR * (AVG_WINDOW_SIZE - ishift) + AVG_SQ_FACTOR * sq(AVG_WINDOW_SIZE - ishift));
   }
-  array_weighted_avg = array_weighted_avg / (AVG_WINDOW_SIZE + AVG_CONST_FACTOR + AVG_ROOT_FACTOR * sqrt(AVG_WINDOW_SIZE) + AVG_LIN_FACTOR * AVG_WINDOW_SIZE + AVG_SQ_FACTOR * sq(AVG_WINDOW_SIZE));
+  array_weighted_avg = array_weighted_avg / (AVG_WINDOW_SIZE * (AVG_CONST_FACTOR + AVG_ROOT_FACTOR * sqrt(AVG_WINDOW_SIZE) + AVG_LIN_FACTOR * AVG_WINDOW_SIZE + AVG_SQ_FACTOR * sq(AVG_WINDOW_SIZE)));
   return array_weighted_avg;
 }
 
