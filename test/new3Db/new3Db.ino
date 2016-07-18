@@ -197,10 +197,10 @@ void loop() {
   }
 
   // Modulate signal between average rms and amplified difference
-  double rms_s1_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s1  + (1 - RMS_AVG_AMP_MOD) * rms_s1_mod);
-  double rms_s2_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s2  + (1 - RMS_AVG_AMP_MOD) * rms_s2_mod);
-  double rms_s3_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s3  + (1 - RMS_AVG_AMP_MOD) * rms_s3_mod);
-  double rms_s4_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s4  + (1 - RMS_AVG_AMP_MOD) * rms_s4_mod);
+  double rms_s1_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s1  + (1 - RMS_AVG_AMP_MOD) * rms_s1_diff);
+  double rms_s2_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s2  + (1 - RMS_AVG_AMP_MOD) * rms_s2_diff);
+  double rms_s3_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s3  + (1 - RMS_AVG_AMP_MOD) * rms_s3_diff);
+  double rms_s4_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s4  + (1 - RMS_AVG_AMP_MOD) * rms_s4_diff);
   // print them
   if (PRINT_RMS_MOD) {
     if (PRINT_OLD) {
