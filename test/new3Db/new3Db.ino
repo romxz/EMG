@@ -24,7 +24,13 @@ double array_rms_s1[AVG_WINDOW_SIZE], array_rms_s2[AVG_WINDOW_SIZE],
        array_rms_s3[AVG_WINDOW_SIZE], array_rms_s4[AVG_WINDOW_SIZE];
 int counterArray = 0;
 
-// averaged window memory shape factors:
+// Bias for each raw channel
+#define BIAS_S1 1
+#define BIAS_S2 1
+#define BIAS_S3 1
+#define BIAS_S4 1
+
+// Averaged window memory shape factors:
 #define AVG_CONST_FACTOR 0
 #define AVG_LIN_FACTOR 1
 #define AVG_SQ_FACTOR 0
@@ -75,16 +81,16 @@ void loop() {
   double sumSquares_s1 = 0.0, sumSquares_s2 = 0.0, sumSquares_s3 = 0.0, sumSquares_s4 = 0.0;
   for (int counterRMS = 0; counterRMS < NUM_SAMPLES; counterRMS++)
   {
-    sensorVal[0] = analogRead(SENSOR_1_PIN);
+    sensorVal[0] = BIAS_S1 * analogRead(SENSOR_1_PIN);
     sumSquares_s1 = sumSquares_s1 + sq(sensorVal[0]);
     delay(DELAY_TIME_ANALOG);
-    sensorVal[1] = analogRead(SENSOR_2_PIN);
+    sensorVal[1] = BIAS_S2 * analogRead(SENSOR_2_PIN);
     sumSquares_s2 = sumSquares_s2 + sq(sensorVal[1]);
     delay(DELAY_TIME_ANALOG);
-    sensorVal[2] = analogRead(SENSOR_3_PIN);
+    sensorVal[2] = BIAS_S3 * analogRead(SENSOR_3_PIN);
     sumSquares_s3 = sumSquares_s3 + sq(sensorVal[2]);
     delay(DELAY_TIME_ANALOG);
-    sensorVal[3] = analogRead(SENSOR_4_PIN);
+    sensorVal[3] = BIAS_S4 * analogRead(SENSOR_4_PIN);
     sumSquares_s4 = sumSquares_s4 + sq(sensorVal[3]);
     delay(DELAY_TIME_ANALOG);
   }
