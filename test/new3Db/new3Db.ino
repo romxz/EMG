@@ -1,258 +1,257 @@
 /*
   #include <SoftwareSerial.h>
   #include <math.h>
-  /*Declare your sensor pins as variables. I'm using Analog In pins 0 and 1. Change the names and numbers as needed
-  Pro tip: If you're pressed for memory, use #define to declare your sensor pins without using any memory. Just be careful that your pin name shows up NOWHERE ELSE in your sketch!
-  for more info, see: http://arduino.cc/en/Reference/Define
+  For more info, see: http://arduino.cc/en/Reference/Define
 */
-int sensor1Pin = A2; // sensor 1
-#define sensor2Pin A3 // sensor 2
-#define sensor3Pin A4 // sensor 3
-#define sensor4Pin A5 // sensor 4
+// Number of Sensors (unused atm)
+#define PRINT_OLD false
+#define NUM_SENSORS 4
+
+// Sensor Pins
+#define SENSOR_1_PIN A2
+#define SENSOR_2_PIN A3
+#define SENSOR_3_PIN A4
+#define SENSOR_4_PIN A5
+
+// Array to store input reads from analog
+double sensorVal[] = {0, 0, 0, 0};
+#define DELAY_TIME_ANALOG 0.1 // time delay between analog samples
+
+// Windowed Sampling parameters
+#define NUM_SAMPLES 150 // number of samples in a window of (0.1 second)
+#define AVG_WINDOW_SIZE 50 //
+double array_rms_s1[AVG_WINDOW_SIZE], array_rms_s2[AVG_WINDOW_SIZE],
+       array_rms_s3[AVG_WINDOW_SIZE], array_rms_s4[AVG_WINDOW_SIZE];
+int counterArray = 0;
+
+// averaged window memory shape factors:
+#define AVG_CONST_FACTOR 0
+#define AVG_LIN_FACTOR 1
+#define AVG_SQ_FACTOR 0
+#define AVG_ROOT_FACTOR 0
+
+// Variables for 4 sensor signal manipulation:
+#define AMPLIFY_DIFF 1
+#define AMPLIFY_DIFF_RADIUS 0
+#define RMS_AVG_AMP_MOD 0.5
+
+// Print Modes
+#define PRINT_RMS_RAW false
+#define PRINT_RMS_AVG false
+#define PRINT_RMS_DIFF false
+#define PRINT_RMS_MOD false
+#define PRINT_RMS_LOG true
+
+#define log_max_range 6 // Keep log output between -3 and 6
 
 void setup() {
-
   Serial.begin(9600); //This line tells the Serial port to begin communicating at 9600 bauds
-  pinMode(sensor1Pin, INPUT);
-  digitalWrite(sensor1Pin, LOW);
-  pinMode(sensor2Pin, INPUT);
-  digitalWrite(sensor2Pin, LOW);
-  pinMode(sensor3Pin, INPUT);
-  digitalWrite(sensor3Pin, LOW);
-  pinMode(sensor4Pin, INPUT);
-  digitalWrite(sensor4Pin, LOW);
+  pinMode(SENSOR_1_PIN, INPUT);
+  digitalWrite(SENSOR_1_PIN, LOW);
+  pinMode(SENSOR_2_PIN, INPUT);
+  digitalWrite(SENSOR_2_PIN, LOW);
+  pinMode(SENSOR_3_PIN, INPUT);
+  digitalWrite(SENSOR_3_PIN, LOW);
+  pinMode(SENSOR_4_PIN, INPUT);
+  digitalWrite(SENSOR_4_PIN, LOW);
 }
 
-int counterArray = 0, counterRMS = 0;
-float sensorVal[] = {0, 0, 0, 0};
-// Window and sampling variables
-#define numWindow 50
-double arrayRMS1[numWindow], arrayRMS2[numWindow], arrayRMS3[numWindow], arrayRMS4[numWindow];
-#define numSamples 150 //number of samples in a window of (0.1 second)
-#define averageConstantFactor 0
-#define averageLinearFactor 0
-#define averageSquaredFactor 1
-#define averageRootFactor 1
-#define delayTime 0.1
-#define numSensors 4
-// Variables when using 3 sensors
-#define amplifier3 2
-// Variables when using 4 sensors
-#define modulator4 0.3
-#define amplifier4 10
-// Print Modes
-#define printnewNormal true
-#define printnewLog false
-#define printrms false
-#define printrmsavg false
-#define printrmsRAW false
-// Parameteters for modifying 4-sensors signal
-double radius4, rem_a4, rem_b4, rem_c4, rem_d4,
-       rmsDIF_a4, rmsDIF_b4, rmsDIF_c4, rmsDIF_d4,
-       rmsDIF_norm, rmsAMP_a4, rmsAMP_b4, rmsAMP_c4, rmsAMP_d4,
-       rmsMOD_a4, rmsMOD_b4, rmsMOD_c4, rmsMOD_d4;
-#define rmsDIF_scale 4
-double logrmsMOD_a4, logrmsMOD_b4, logrmsMOD_c4, logrmsMOD_d4;
-
-double avgW(double a[], int index) {
-  double averageW;
-  averageW = (numWindow + averageConstantFactor) * a[index];
-  for (int ishift = 1; ishift < numWindow; ishift++) {
+// Takes weighted average, weight shape depending on factors defined at the top
+double window_weighted_avg(double a[], int index) {
+  double array_weighted_avg = a[index] * (AVG_WINDOW_SIZE + AVG_CONST_FACTOR + AVG_ROOT_FACTOR * sqrt(AVG_WINDOW_SIZE) + AVG_LIN_FACTOR * AVG_WINDOW_SIZE + AVG_SQ_FACTOR * sq(AVG_WINDOW_SIZE));
+  for (int ishift = 1; ishift < AVG_WINDOW_SIZE; ishift++) {
     index = index - 1;
     if (index < 0) {
-      index = numWindow - 1;
+      index = AVG_WINDOW_SIZE - 1;
     }
-    averageW = averageW + (averageConstantFactor + averageRootFactor * sqrt(numWindow - ishift) + averageLinearFactor * (numWindow - ishift) + averageSquaredFactor * (numWindow - ishift) * (numWindow - ishift)) * a[index];
+    array_weighted_avg = array_weighted_avg + a[index] * (AVG_CONST_FACTOR + AVG_ROOT_FACTOR * sqrt(AVG_WINDOW_SIZE - ishift) + AVG_LIN_FACTOR * (AVG_WINDOW_SIZE - ishift) + AVG_SQ_FACTOR * sq(AVG_WINDOW_SIZE - ishift));
   }
-  averageW = averageW / ((numWindow + averageConstantFactor) * (numWindow + averageConstantFactor));
-  return averageW;
+  array_weighted_avg = array_weighted_avg / (AVG_WINDOW_SIZE + AVG_CONST_FACTOR + AVG_ROOT_FACTOR * sqrt(AVG_WINDOW_SIZE) + AVG_LIN_FACTOR * AVG_WINDOW_SIZE + AVG_SQ_FACTOR * sq(AVG_WINDOW_SIZE));
+  return array_weighted_avg;
 }
 
 void loop() {
-  double rmsRAW1 = 0.0, rmsRAW2 = 0.0, rmsRAW3 = 0.0, rmsRAW4 = 0.0,
-         rmsAVG1 = 0.0, rmsAVG2 = 0.0, rmsAVG3 = 0.0, rmsAVG4 = 0.0,
-         logrmsAVG1 = 0.0, logrmsAVG2 = 0.0, logrmsAVG3 = 0.0, logrmsAVG4 = 0.0,
-         sumSquares1 = 0.0, sumSquares2 = 0.0, sumSquares3 = 0.0, sumSquares4 = 0.0;
-  double pa3, pb3, pc3, a3, b3, c3, r3, d3,
-         aa3, bb3, cc3, modulator3;
-  for (int counterRMS=0; counterRMS < numSamples; counterRMS++)
+  // get rms over a sample window of size NUM_SAMPLES
+  double sumSquares_s1 = 0.0, sumSquares_s2 = 0.0, sumSquares_s3 = 0.0, sumSquares_s4 = 0.0;
+  for (int counterRMS = 0; counterRMS < NUM_SAMPLES; counterRMS++)
   {
-    sensorVal[0] = analogRead(sensor1Pin);
-    delay(delayTime);
-    sensorVal[1] = analogRead(sensor2Pin);
-    delay(delayTime);
-    sensorVal[2] = analogRead(sensor3Pin);
-    delay(delayTime);
-    sensorVal[3] = analogRead(sensor4Pin);
-    delay(delayTime);
-    sumSquares1 = sumSquares1 + sensorVal[0] * sensorVal[0];
-    sumSquares2 = sumSquares2 + sensorVal[1] * sensorVal[1];
-    sumSquares3 = sumSquares3 + sensorVal[2] * sensorVal[2];
-    sumSquares4 = sumSquares4 + sensorVal[3] * sensorVal[3];
+    sensorVal[0] = analogRead(SENSOR_1_PIN);
+    sumSquares_s1 = sumSquares_s1 + sq(sensorVal[0]);
+    delay(DELAY_TIME_ANALOG);
+    sensorVal[1] = analogRead(SENSOR_2_PIN);
+    sumSquares_s2 = sumSquares_s2 + sq(sensorVal[1]);
+    delay(DELAY_TIME_ANALOG);
+    sensorVal[2] = analogRead(SENSOR_3_PIN);
+    sumSquares_s3 = sumSquares_s3 + sq(sensorVal[2]);
+    delay(DELAY_TIME_ANALOG);
+    sensorVal[3] = analogRead(SENSOR_4_PIN);
+    sumSquares_s4 = sumSquares_s4 + sq(sensorVal[3]);
+    delay(DELAY_TIME_ANALOG);
+  }
+  // obtain raw rms
+  double rms_raw_s1 = sqrt(sumSquares_s1 / NUM_SAMPLES);
+  double rms_raw_s2 = sqrt(sumSquares_s2 / NUM_SAMPLES);
+  double rms_raw_s3 = sqrt(sumSquares_s3 / NUM_SAMPLES);
+  double rms_raw_s4 = sqrt(sumSquares_s4 / NUM_SAMPLES);
+
+  // print raw rms
+  if (PRINT_RMS_RAW) {
+    if (PRINT_OLD) {
+      Serial.print(rms_raw_s1);
+      Serial.print(",");
+      Serial.print(rms_raw_s2);
+      Serial.print(",");
+      Serial.print(rms_raw_s3);
+      Serial.print(",");
+      Serial.println(rms_raw_s4);
+    } else {
+      String toPrint = String(String(rms_raw_s1, 2) + "," + String(rms_raw_s2, 2) + "," + String(rms_raw_s3, 2) + "," + String(rms_raw_s4, 2));
+      Serial.println(toPrint);
+    }
   }
 
-  // unsigned long currentTime=micros();
-  // elapsed=currentTime-startTime;
-  rmsRAW1 = sqrt(sumSquares1 / numSamples);
-  rmsRAW2 = sqrt(sumSquares2 / numSamples);
-  rmsRAW3 = sqrt(sumSquares3 / numSamples);
-  rmsRAW4 = sqrt(sumSquares4 / numSamples);
-  
-  if (printrmsRAW == true) {
-    Serial.print(rmsRAW1); //a2
-    Serial.print(",");
-    Serial.print(rmsRAW2); //a3
-    Serial.print(",");
-    Serial.print(rmsRAW3); //a4
-    Serial.print(",");
-    Serial.println(rmsRAW4); //a5
-  }
-  
-  arrayRMS1[counterArray] = rmsRAW1;
-  arrayRMS2[counterArray] = rmsRAW2;
-  arrayRMS3[counterArray] = rmsRAW3;
-  arrayRMS4[counterArray] = rmsRAW4;
-  rmsAVG1 = avgW(arrayRMS1, counterArray);
-  rmsAVG2 = avgW(arrayRMS2, counterArray);
-  rmsAVG3 = avgW(arrayRMS3, counterArray);
-  rmsAVG4 = avgW(arrayRMS4, counterArray);
-  
-  if (printrmsavg == true) {
-    Serial.print(rmsAVG1); //a2
-    Serial.print(",");
-    Serial.print(rmsAVG2); //a3
-    Serial.print(",");
-    Serial.print(rmsAVG3); //a4
-    Serial.print(",");
-    Serial.println(rmsAVG4); //a5
+  // obtain weighted rms over a time window of size AVG_WINDOW_SIZE
+  array_rms_s1[counterArray] = rms_raw_s1;
+  array_rms_s2[counterArray] = rms_raw_s2;
+  array_rms_s3[counterArray] = rms_raw_s3;
+  array_rms_s4[counterArray] = rms_raw_s4;
+  double rms_avg_s1 = window_weighted_avg(array_rms_s1, counterArray);
+  double rms_avg_s2 = window_weighted_avg(array_rms_s2, counterArray);
+  double rms_avg_s3 = window_weighted_avg(array_rms_s3, counterArray);
+  double rms_avg_s4 = window_weighted_avg(array_rms_s4, counterArray);
+
+  // print averaged rms
+  if (PRINT_RMS_AVG) {
+    if (PRINT_OLD) {
+      Serial.print(rms_avg_s1);
+      Serial.print(",");
+      Serial.print(rms_avg_s2);
+      Serial.print(",");
+      Serial.print(rms_avg_s3);
+      Serial.print(",");
+      Serial.println(rms_avg_s4);
+    } else {
+      String toPrint = String(String(rms_avg_s1, 2) + "," + String(rms_avg_s2, 2) + "," + String(rms_avg_s3, 2) + "," + String(rms_avg_s4, 2));
+      Serial.println(toPrint);
+    }
   }
 
-  
-  // Manipulating 4-sensor signal
-  radius4 = sqrt(rmsAVG1 * rmsAVG1 + rmsAVG2 * rmsAVG2 + rmsAVG3 * rmsAVG3 + rmsAVG4 * rmsAVG4);
-  rem_a4 = sqrt(rmsAVG2 * rmsAVG2 + rmsAVG3 * rmsAVG3 + rmsAVG4 * rmsAVG4);
-  rem_b4 = sqrt(rmsAVG1 * rmsAVG1 + rmsAVG3 * rmsAVG3 + rmsAVG4 * rmsAVG4);
-  rem_c4 = sqrt(rmsAVG2 * rmsAVG2 + rmsAVG1 * rmsAVG1 + rmsAVG4 * rmsAVG4);
-  rem_d4 = sqrt(rmsAVG2 * rmsAVG2 + rmsAVG3 * rmsAVG3 + rmsAVG1 * rmsAVG1);
-  rmsDIF_a4 = rmsDIF_scale * rmsAVG1 - rem_a4;
-  rmsDIF_b4 = rmsDIF_scale * rmsAVG2 - rem_b4;
-  rmsDIF_c4 = rmsDIF_scale * rmsAVG3 - rem_c4;
-  rmsDIF_d4 = rmsDIF_scale * rmsAVG4 - rem_d4;
-  rmsDIF_norm = rem_a4 + rem_b4 + rem_c4 + rem_d4 + 1;
-  rmsAMP_a4 = radius4 * amplifier4 * (1 + rmsDIF_a4 / rmsDIF_norm );
-  rmsAMP_b4 = radius4 * amplifier4 * (1 + rmsDIF_b4 / rmsDIF_norm );
-  rmsAMP_c4 = radius4 * amplifier4 * (1 + rmsDIF_c4 / rmsDIF_norm );
-  rmsAMP_d4 = radius4 * amplifier4 * (1 + rmsDIF_d4 / rmsDIF_norm );
-  rmsMOD_a4 = modulator4 * logrmsAVG1 + (1 - modulator4) * rmsAMP_a4;
-  rmsMOD_b4 = modulator4 * logrmsAVG2 + (1 - modulator4) * rmsAMP_b4;
-  rmsMOD_c4 = modulator4 * logrmsAVG3 + (1 - modulator4) * rmsAMP_c4;
-  rmsMOD_d4 = modulator4 * logrmsAVG4 + (1 - modulator4) * rmsAMP_d4;
-  if (printrms == true) {
-    Serial.print(logrmsAVG1); //a2
-    Serial.print(",");
-    Serial.print(logrmsAVG2); //a3
-    Serial.print(",");
-    Serial.print(logrmsAVG3); //a4
-    Serial.print(",");
-    Serial.println(logrmsAVG4); //a5
-  }
-  // Avoidig zero-input errors
-  if (rmsMOD_a4 < 0.001) {
-    rmsMOD_a4 = 0.001;
-  }
-  if (rmsMOD_b4 < 0.001) {
-    rmsMOD_b4 = 0.001;
-  }
-  if (rmsMOD_c4 < 0.001) {
-    rmsMOD_c4 = 0.001;
-  }
-  if (rmsMOD_d4 < 0.001) {
-    rmsMOD_d4 = 0.001;
-  }
-  if (printnewNormal == true) {
-    Serial.print(rmsMOD_a4);
-    Serial.print(",");
-    Serial.print(rmsMOD_b4);
-    Serial.print(",");
-    Serial.print(rmsMOD_c4);
-    Serial.print(",");
-    Serial.println(rmsMOD_d4);
-  }
-  // Get log of signal
-  logrmsMOD_a4 = log(rmsMOD_a4);
-  logrmsMOD_b4 = log(rmsMOD_b4);
-  logrmsMOD_c4 = log(rmsMOD_c4);
-  logrmsMOD_d4 = log(rmsMOD_d4);
-  if (logrmsMOD_a4 < -3) {
-    logrmsMOD_a4 = -3;
-  }
-  if (logrmsMOD_b4 < -3) {
-    logrmsMOD_b4 = -3;
-  }
-  if (logrmsMOD_c4 < -3) {
-    logrmsMOD_c4 = -3;
-  }
-  if (logrmsMOD_d4 < -3) {
-    logrmsMOD_d4 = -3;
-  }
-  if (printnewLog == true) {
-    Serial.print(logrmsMOD_a4);
-    Serial.print(",");
-    Serial.print(logrmsMOD_b4);
-    Serial.print(",");
-    Serial.print(logrmsMOD_c4);
-    Serial.print(",");
-    Serial.println(logrmsMOD_d4);
+  // *** Manipulating 4-sensor signal ***
+  // signal strength and difference norms
+  double rms_radius_norm = sqrt(sq(rms_avg_s1) + sq(rms_avg_s2) + sq(rms_avg_s3) + sq(rms_avg_s4));
+  double rms_diff_norm = sqrt(sq(rms_avg_s2 - rms_avg_s1) + sq(rms_avg_s3 - rms_avg_s1) + sq(rms_avg_s4 - rms_avg_s1) + sq(rms_avg_s4 - rms_avg_s2) + sq(rms_avg_s3 - rms_avg_s2) + sq(rms_avg_s4 - rms_avg_s3)) + 1;
+
+  // Capture and amplify / manipulate differences between channels:
+
+  // distance from avg:
+  double rms_s1_diff = 3 * rms_avg_s1 - rms_avg_s2 + rms_avg_s3 + rms_avg_s4;
+  double rms_s2_diff = 3 * rms_avg_s2 - rms_avg_s3 + rms_avg_s4 + rms_avg_s1;
+  double rms_s3_diff = 3 * rms_avg_s3 - rms_avg_s4 + rms_avg_s1 + rms_avg_s2;
+  double rms_s4_diff = 3 * rms_avg_s4 - rms_avg_s1 + rms_avg_s2 + rms_avg_s3;
+  // ~sign of distance from avg (avoiding division by zero):
+  rms_s1_diff = rms_s1_diff / (abs(rms_s1_diff) + 1);
+  rms_s2_diff = rms_s2_diff / (abs(rms_s2_diff) + 1);
+  rms_s3_diff = rms_s3_diff / (abs(rms_s3_diff) + 1);
+  rms_s4_diff = rms_s4_diff / (abs(rms_s4_diff) + 1);
+  // capture relevant (signed) radius of distance:
+  rms_s1_diff = rms_s1_diff * sqrt(sq(rms_avg_s2 - rms_avg_s1) + sq(rms_avg_s3 - rms_avg_s1) + sq(rms_avg_s4 - rms_avg_s1));
+  rms_s2_diff = rms_s2_diff * sqrt(sq(rms_avg_s3 - rms_avg_s2) + sq(rms_avg_s4 - rms_avg_s2) + sq(rms_avg_s1 - rms_avg_s2));
+  rms_s3_diff = rms_s3_diff * sqrt(sq(rms_avg_s4 - rms_avg_s3) + sq(rms_avg_s1 - rms_avg_s3) + sq(rms_avg_s2 - rms_avg_s3));
+  rms_s4_diff = rms_s4_diff * sqrt(sq(rms_avg_s1 - rms_avg_s4) + sq(rms_avg_s2 - rms_avg_s4) + sq(rms_avg_s3 - rms_avg_s4));
+  // normalize relative to others:
+  rms_s1_diff = rms_s1_diff / rms_diff_norm;
+  rms_s2_diff = rms_s2_diff / rms_diff_norm;
+  rms_s3_diff = rms_s3_diff / rms_diff_norm;
+  rms_s4_diff = rms_s4_diff / rms_diff_norm;
+  // shift these differences to make them positive:
+  double rms_diff_shift_norm = abs(rms_s1_diff) + abs(rms_s2_diff) + abs(rms_s3_diff) + abs(rms_s4_diff);
+  rms_s1_diff = rms_diff_shift_norm + rms_s1_diff;
+  rms_s2_diff = rms_diff_shift_norm + rms_s2_diff;
+  rms_s3_diff = rms_diff_shift_norm + rms_s3_diff;
+  rms_s4_diff = rms_diff_shift_norm + rms_s4_diff;
+  // amplify signal with this difference, as well as when there is some overall sensor activity:
+  rms_s1_diff = (1 + rms_radius_norm * AMPLIFY_DIFF_RADIUS) * AMPLIFY_DIFF * rms_s1_diff;
+  rms_s2_diff = (1 + rms_radius_norm * AMPLIFY_DIFF_RADIUS) * AMPLIFY_DIFF * rms_s2_diff;
+  rms_s3_diff = (1 + rms_radius_norm * AMPLIFY_DIFF_RADIUS) * AMPLIFY_DIFF * rms_s3_diff;
+  rms_s4_diff = (1 + rms_radius_norm * AMPLIFY_DIFF_RADIUS) * AMPLIFY_DIFF * rms_s4_diff;
+  // print them:
+  if (PRINT_RMS_DIFF) {
+    if (PRINT_OLD) {
+      Serial.print(rms_s1_diff); //a2
+      Serial.print(",");
+      Serial.print(rms_s2_diff); //a3
+      Serial.print(",");
+      Serial.print(rms_s3_diff); //a4
+      Serial.print(",");
+      Serial.println(rms_s4_diff); //a5
+    } else {
+      String toPrint = String(String(rms_s1_diff, 2) + "," + String(rms_s2_diff, 2) + "," + String(rms_s3_diff, 2) + "," + String(rms_s4_diff, 2));
+      Serial.println(toPrint);
+    }
   }
 
+  // Modulate signal between average rms and amplified difference
+  double rms_s1_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s1  + (1 - RMS_AVG_AMP_MOD) * rms_s1_mod);
+  double rms_s2_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s2  + (1 - RMS_AVG_AMP_MOD) * rms_s2_mod);
+  double rms_s3_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s3  + (1 - RMS_AVG_AMP_MOD) * rms_s3_mod);
+  double rms_s4_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s4  + (1 - RMS_AVG_AMP_MOD) * rms_s4_mod);
+  // print them
+  if (PRINT_RMS_MOD) {
+    if (PRINT_OLD) {
+      Serial.print(rms_s1_mod); //a2
+      Serial.print(",");
+      Serial.print(rms_s2_mod); //a3
+      Serial.print(",");
+      Serial.print(rms_s3_mod); //a4
+      Serial.print(",");
+      Serial.println(rms_s4_mod); //a5
+    } else {
+      String toPrint = String(String(rms_s1_mod, 2) + "," + String(rms_s2_mod, 2) + "," + String(rms_s3_mod, 2) + "," + String(rms_s4_mod, 2));
+      Serial.println(toPrint);
+    }
+  }
+
+  // take log of signals, making sure to avoid zero-input errors
+  if (rms_s1_mod < 0.001) rms_s1_mod = 0.001;
+  if (rms_s2_mod < 0.001) rms_s2_mod = 0.001;
+  if (rms_s3_mod < 0.001) rms_s3_mod = 0.001;
+  if (rms_s4_mod < 0.001) rms_s4_mod = 0.001;
+  double logrms_s1_mod = log(rms_s1_mod);
+  double logrms_s2_mod = log(rms_s2_mod);
+  double logrms_s3_mod = log(rms_s3_mod);
+  double logrms_s4_mod = log(rms_s4_mod);
+  // limit upper range to a fixed number
+  if (logrms_s1_mod > log_max_range) {
+    logrms_s1_mod = log_max_range;
+  }
+  if (logrms_s2_mod > log_max_range) {
+    logrms_s2_mod = log_max_range;
+  }
+  if (logrms_s3_mod > log_max_range) {
+    logrms_s3_mod = log_max_range;
+  }
+  if (logrms_s4_mod > log_max_range) {
+    logrms_s4_mod = log_max_range;
+  }
+  // print them
+  if (PRINT_RMS_LOG) {
+    if (PRINT_OLD) {
+      Serial.print(logrms_s1_mod);
+      Serial.print(",");
+      Serial.print(logrms_s2_mod);
+      Serial.print(",");
+      Serial.print(logrms_s3_mod);
+      Serial.print(",");
+      Serial.println(logrms_s4_mod);
+    } else {
+      String toPrint = String(String(logrms_s1_mod, 2) + "," + String(logrms_s2_mod, 2) + "," + String(logrms_s3_mod, 2) + "," + String(logrms_s4_mod, 2));
+      Serial.println(toPrint);
+    }
+  }
+
+  // increase counter for window
   counterArray++;
-  if (counterArray >= numWindow) {
+  if (counterArray >= AVG_WINDOW_SIZE) {
     counterArray = 0;
   }
 }
-
-// For 3 sensos:
-/*
-  r3 = sqrt(logrmsAVG2 * logrmsAVG2 + logrmsAVG3 * logrmsAVG3 + logrmsAVG4 * logrmsAVG4);
-  a3 = logrmsAVG2 - logrmsAVG3;
-  b3 = logrmsAVG3 - logrmsAVG4;
-  c3 = logrmsAVG4 - logrmsAVG2;
-  d3 = abs(a3) + abs(d3) + abs(c3) + 1;
-  pa3 = r3 * (1 + amplifier3 * a3 / d3);
-  pb3 = r3 * (1 + amplifier3 * b3 / d3);
-  pc3 = r3 * (1 + amplifier3 * c3 / d3);
-  modulator3 = 0.8;
-  aa3 = modulator3 * logrmsAVG2 + (1-modulator) * pa3;
-  bb3 = modulator3 * logrmsAVG3 + (1-modulator) * pb3;
-  cc3 = modulator3 * logrmsAVG4 + (1-modulator) * pc3;
-*/
-
-
-/*
-  rmsAVG1 = 0.8 * maxi(arrayRMS1) + 0.1 * mini(arrayRMS1) + 0.3 * arrayRMS1[counterArray];
-  rmsAVG2 = 0.8 * maxi(arrayRMS2) + 0.2 * arrayRMS2[counterArray];
-  rmsAVG3 = 0.8 * maxi(arrayRMS3) + 0.2 * arrayRMS3[counterArray];
-*/
-
-/*
-  double maxi(double a[])
-  {
-  double maximum = a[0];
-  for (int i = 0; i < numWindow; i++)
-  {
-    if (a[i] > maximum)
-      maximum = a[i];
-  }
-  return maximum;
-  }
-  double mini(double a[])
-  {
-  double minimum = a[0];
-  for (int i = 0; i < numWindow; i++)
-  {
-    if (a[i] < minimum)
-      minimum = a[i];
-  }
-  return minimum;
-  }
-*/
