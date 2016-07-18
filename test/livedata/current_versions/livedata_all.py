@@ -48,7 +48,7 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 """ 2. Constants """
 
 sensor_num = 2
-record_time = 120
+time_run = 120
 clusters = 4
 xmax = 9
 xmin = 0
@@ -97,7 +97,7 @@ def threeDconv(array): #array = 2D matrix (3 rows, N columns)
 
 """ 5. Options """
 
-cont_mode = False
+cont_mode = True
 store_data = False
 store_image = False
 cent_lines = False

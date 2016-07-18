@@ -8,9 +8,9 @@ void setup() {
 #define SENSOR_3_READ 3.14159
 #define SENSOR_4_READ 2.71
 int counterTime = 0;
-#define SPEED_CONSTANT 0.0001
+#define SPEED_CONSTANT 0.05
 #define ANGLE_PHASE 0.7
-#define SEE_WAVEFORM true
+#define SEE_WAVEFORM false
 
 void loop() {
   // put your main code here, to run repeatedly:
@@ -32,10 +32,10 @@ void loop() {
     Serial.print(",");
     Serial.println(String(sensorInput4, 2));
   } else {
-    String toPrint = String(String(sensorInput1, 2) + "," + String(sensorInput2, 2) + "," + String(sensorInput3, 2) + "," + String(sensorInput4, 2));
+    String toPrint = String(String(sensorInput1, 2) + "," + String(sensorInput2, 2) + "," + String(sensorInput3, 2) + "," + String(sensorInput4, 2) + ";");
     Serial.println(toPrint);
   }
-  delay(.1);
+  delay(1);
   counterTime++;
   if (counterTime > 62830) {
     counterTime = 0;
