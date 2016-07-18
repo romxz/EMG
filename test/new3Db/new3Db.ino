@@ -4,7 +4,7 @@
   For more info, see: http://arduino.cc/en/Reference/Define
 */
 // Number of Sensors (unused atm)
-#define PRINT_OLD false
+#define SEE_WAVEFORM false
 #define NUM_SENSORS 4
 
 // Sensor Pins
@@ -102,7 +102,7 @@ void loop() {
 
   // print raw rms
   if (PRINT_RMS_RAW) {
-    if (PRINT_OLD) {
+    if (SEE_WAVEFORM) {
       Serial.print(rms_raw_s1);
       Serial.print(",");
       Serial.print(rms_raw_s2);
@@ -128,7 +128,7 @@ void loop() {
 
   // print averaged rms
   if (PRINT_RMS_AVG) {
-    if (PRINT_OLD) {
+    if (SEE_WAVEFORM) {
       Serial.print(rms_avg_s1);
       Serial.print(",");
       Serial.print(rms_avg_s2);
@@ -182,7 +182,7 @@ void loop() {
   rms_s4_diff = (1 + rms_radius_norm * AMPLIFY_DIFF_RADIUS) * AMPLIFY_DIFF * rms_s4_diff;
   // print them:
   if (PRINT_RMS_DIFF) {
-    if (PRINT_OLD) {
+    if (SEE_WAVEFORM) {
       Serial.print(rms_s1_diff); //a2
       Serial.print(",");
       Serial.print(rms_s2_diff); //a3
@@ -203,7 +203,7 @@ void loop() {
   double rms_s4_mod = 2 * (RMS_AVG_AMP_MOD * rms_avg_s4  + (1 - RMS_AVG_AMP_MOD) * rms_s4_diff);
   // print them
   if (PRINT_RMS_MOD) {
-    if (PRINT_OLD) {
+    if (SEE_WAVEFORM) {
       Serial.print(rms_s1_mod); //a2
       Serial.print(",");
       Serial.print(rms_s2_mod); //a3
@@ -241,7 +241,7 @@ void loop() {
   }
   // print them
   if (PRINT_RMS_LOG) {
-    if (PRINT_OLD) {
+    if (SEE_WAVEFORM) {
       Serial.print(logrms_s1_mod);
       Serial.print(",");
       Serial.print(logrms_s2_mod);
