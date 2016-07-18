@@ -50,8 +50,19 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 sensor_num = 2
 record_time = 120
 clusters = 4
-scale_left = -1 
-scale_right = 9
+xmax = 9
+xmin = 0
+ymax = 9
+ymin = 0
+#for 3D
+zmax = 9
+zmin = 0
+#for 4D
+xmax2 = 9
+xmin2 = 0
+ymax2 = 9
+ymin2 = 0
+
 colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'w']
 
 """ 3. Variables """
@@ -102,17 +113,17 @@ print("connected to: " + ser.portstr)
 
 if sensor_num == 2:
     fig0 = plt.figure(0)
-    plt.axis([scale_left,scale_right,scale_left,scale_right])
+    plt.axis([xmin,xmax,ymin,ymax])
 elif sensor_num == 3:
     fig0 = plt.figure(0)
     ax = plt.axes(projection = "3d")
-    ax.set_xlim(scale_left,scale_right)
-    ax.set_ylim(scale_left,scale_right)
-    ax.set_zlim(scale_left,scale_right)
+    ax.set_xlim(xmin,xmax)
+    ax.set_ylim(ymin,ymax)
+    ax.set_zlim(zmin,zmax)
 elif sensor_num == 4:
     fig0, (ax1, ax2) = plt.subplots(1, 2, figsize = (16,8))
-    ax1.axis([scale_left,scale_right,scale_left,scale_right])
-    ax2.axis([scale_left,scale_right,scale_left,scale_right])
+    ax1.axis([xmin,xmax,ymin,ymax])
+    ax2.axis([xmin2,xmax2,ymin2,ymax2])
 plt.ion()
 
 """ 8. Time """
@@ -145,15 +156,15 @@ while cont_mode:
                     x2 = float(a[2])
                     y2 = float(a[3])
                     print(a)
-                    if (x1>scale_left and x1<scale_right and x2>scale_left and x2<scale_right and y1>scale_left and y1<scale_right and y2>scale_left and y2<scale_right):
+                    if (x1>xmin and x1<xmax and x2>xmin2 and x2<xmax2 and y1>ymin and y1<ymax and y2>ymin2 and y2<ymax2):
                             ax1.scatter(x1,y1,s=10, color = "y")
                             ax2.scatter(x2,y2,s=10, color = "y")
                             plt.show()
                     plt.pause(0.000000001)
                     ax1.clear()
                     ax2.clear()
-                    ax1.axis([scale_left,scale_right,scale_left,scale_right])
-                    ax2.axis([scale_left,scale_right,scale_left,scale_right])
+                    ax1.axis([xmin,xmax,ymin,ymax])
+                    ax2.axis([xmin2,xmax2,ymin2,ymax2])
                     
             elif sensor_num == 3:
                 if (len(a) == 3):
@@ -166,25 +177,24 @@ while cont_mode:
                         x = converted_xyz[0][0]
                         y = converted_xyz[1][0]
                         z = converted_xyz[2][0]
-                    if (x<scale_right and y<scale_right and z<scale_right and x>scale_left and y>scale_left and z>scale_left):
+                    if (x<xmax and y<ymax and z<zmax and x>xmin and y>ymin and z>zmin):
                         ax.scatter(x,y,z, c='y', s=10, marker = "o")
                         plt.pause(0.00000001)
                     ax.clear()
-                    ax.set_xlim(scale_left,scale_right)
-                    ax.set_ylim(scale_left,scale_right)
-                    ax.set_zlim(scale_left,scale_right)
-                                            
+                    ax = plt.axes(projection = "3d")
+                    ax.set_xlim(xmin,xmax)
+                    ax.set_ylim(ymin,ymax)
+                    ax.set_zlim(zmin,zmax)
             elif sensor_num == 2:               
                 if ((len(a) == 2)):
                     if (len(a[0])>=4 & len(a[1])>=4):
-                        #time100 = time.time()
                         x = float(a[0])
                         y = float(a[1])
                         all_data.append([x,y])
                         plt.scatter(x,y,s=10, color = "y")
                         plt.pause(0.000000001)
                         plt.clf()
-                        plt.axis([scale_left,scale_right,scale_left,scale_right])
+                        plt.axis([xmin,xmax,ymin,ymax])
                         
             
             line = []
@@ -216,7 +226,7 @@ while time2 - time1 < time_run:
                     y2 = float(a[3])
                     all_data.append([x1,y1,x2,y2])
                     print(a)
-                    if (x1>scale_left and x1<scale_right and x2>scale_left and x2<scale_right and y1>scale_left and y1<scale_right and y2>scale_left and y2<scale_right):
+                    if (x1>xmin and x1<xmax and x2>xmin2 and x2<xmax2 and y1>ymin and y1<ymax and y2>ymin2 and y2<ymax2):
                             ax1.scatter(x1,y1,s=10, color = "y")
                             ax2.scatter(x2,y2,s=10, color = "y")
                             plt.show()
@@ -233,7 +243,7 @@ while time2 - time1 < time_run:
                         x = converted_xyz[0][0]
                         y = converted_xyz[1][0]
                         z = converted_xyz[2][0]
-                    if (x<scale_right and y<scale_right and z<scale_right and x>scale_left and y>scale_left and z>scale_left):
+                    if (x<xmax and y<ymax and z<zmax and x>xmin and y>ymin and z>zmin):
                         all_data.append([x,y,z])
                         ax.scatter(x,y,z, c='y', s=10, marker = "o")
                         plt.pause(0.00000001)
@@ -327,17 +337,17 @@ if store_image == True:
 
 if sensor_num == 2:
     fig1 = plt.figure(1)
-    plt.axis([scale_left,scale_right,scale_left,scale_right])
+    plt.axis([xmin,xmax,ymin,ymax])
 elif sensor_num == 3:
     fig1 = plt.figure(1)
     ax = plt.axes(projection = "3d")
-    ax.set_xlim(scale_left,scale_right)
-    ax.set_ylim(scale_left,scale_right)
-    ax.set_zlim(scale_left,scale_right)
+    ax.set_xlim(xmin,xmax)
+    ax.set_ylim(ymin,ymax)
+    ax.set_zlim(zmin,zmax)
 elif sensor_num == 4:
     fig1, (ax3, ax4) = plt.subplots(1, 2, figsize = (16,8))
-    ax3.axis([scale_left,scale_right,scale_left,scale_right])
-    ax4.axis([scale_left,scale_right,scale_left,scale_right])
+    ax3.axis([xmin,xmax,ymin,ymax])
+    ax4.axis([xmin2,xmax2,ymin2,ymax2])
 plt.ion()
 
 for j in range(clusters):
@@ -370,7 +380,7 @@ if second_loop == True:
                         y1 = float(a[1])
                         x2 = float(a[2])
                         y2 = float(a[3])
-                        if (x1>scale_left and x1<scale_right and x2>scale_left and x2<scale_right and y1>scale_left and y1<scale_right and y2>scale_left and y2<scale_right):
+                        if (x1>xmin and x1<xmax and x2>xmin2 and x2<xmax2 and y1>ymin and y1<ymax and y2>ymin2 and y2<ymax2):
                             a_array = np.asarray([[x1], [y1], [x2], [y2]])
                             v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
                             cluster_num = np.argmax(v[0], axis = 0)
@@ -381,8 +391,8 @@ if second_loop == True:
                             plt.pause(0.000000001)
                             ax3.clear()
                             ax4.clear()
-                            ax3.axis([scale_left,scale_right,scale_left,scale_right])
-                            ax4.axis([scale_left,scale_right,scale_left,scale_right])
+                            ax3.axis([xmin,xmax,ymin,ymax])
+                            ax4.axis([xmin2,xmax2,ymin2,ymax2])
                             for j in range(clusters):              
                                 ax3.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
                                 ax4.plot(cntr[j][2], cntr[j][3], colors[j]+"s")
@@ -398,20 +408,20 @@ if second_loop == True:
                             x = converted_xyz[0][0]
                             y = converted_xyz[1][0]
                             z = converted_xyz[2][0]
-                        if (x<scale_right and y<scale_right and z<scale_right and x>scale_left and y>scale_left and z>scale_left):
+                        if (x<xmax and y<ymax and z<zmax and x>xmin and y>ymin and z>zmin):
                             a_array = np.asarray([[x], [y], [z]])
                             v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
                             cluster_num = np.argmax(v[0], axis = 0)
                             cluster_num = int(cluster_num)
-                            ax.set_xlim(scale_left,scale_right)
-                            ax.set_ylim(scale_left,scale_right)
-                            ax.set_zlim(scale_left,scale_right)
+                            ax.set_xlim(xmin,xmax)
+                            ax.set_ylim(ymin,ymax)
+                            ax.set_zlim(zmin,zmax)
                             ax.scatter(x,y,z,s=40, c = colors[cluster_num])
                             plt.pause(0.000000001)
                             ax.clear()
-                            ax.set_xlim(scale_left,scale_right)
-                            ax.set_ylim(scale_left,scale_right)
-                            ax.set_zlim(scale_left,scale_right)
+                            ax.set_xlim(xmin,xmax)
+                            ax.set_ylim(ymin,ymax)
+                            ax.set_zlim(zmin,zmax)
                             fig1 = plt.figure(1)
                             ax = plt.axes(projection = "3d")
                             for j in range(clusters):            
