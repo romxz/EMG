@@ -174,7 +174,6 @@ void loop() {
   // *** Manipulating 4-sensor signal ***
   // decaying max
   if (USE_DECAY_MAX) {
-    double decaying_max[NUM_SENSORS];
     for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
       if (rms_avg_s[sensorNum] > decaying_max[sensorNum]) {
         decaying_max[sensorNum] = rms_avg_s[sensorNum];
