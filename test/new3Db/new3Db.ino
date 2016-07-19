@@ -59,6 +59,33 @@ double decaying_max[] = {DECAY_MIN, DECAY_MIN, DECAY_MIN, DECAY_MIN};
 #define RMS_MOD_MIN_RANGE 0.001 // Keep modulated rms output above this value
 #define LOG_MAX_RANGE 6 // Keep log output below this value
 
+// Fake Input Parameters
+#define FAKE_INPUT false
+const double FAKE_S[] = {40.1, 5000.1112, 3.14159, 2.71};
+int counterFakeTime = 0;
+#define SPEED_CONSTANT 0.05
+#define ANGLE_PHASE 0.7
+long randNoise;
+
+void randWave(double a[]) {
+  randNoise = random(11);
+  double wave1 = randNoise / 10.0;
+  wave1 = (1 + wave1) * sq(sin(SPEED_CONSTANT * counterFakeTime));
+  randNoise = random(11);
+  double wave2 = randNoise / 10.0;
+  wave2 = (1 + wave2) * sq(sin(SPEED_CONSTANT * counterFakeTime + ANGLE_PHASE + wave1 + wave2));
+  randNoise = random(11);
+  double wave3 = randNoise / 10.0;
+  wave3 = wave3 * sq(sin(SPEED_CONSTANT * counterFakeTime + 2 * ANGLE_PHASE * wave2));
+  randNoise = random(11) / 20.0;
+  double wave4 = randNoise / 10.0;
+  wave4 = (1 + wave4) * sq(sin(SPEED_CONSTANT * counterFakeTime * (1 + wave4) + 3 * ANGLE_PHASE * wave2 + wave3));
+  for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
+    a[sensorNum] = FAKE_S[sensorNum] * wave1 + FAKE_S[(sensorNum + 1) % NUM_SENSORS] * wave2 + FAKE_S[(sensorNum + 2) % NUM_SENSORS] * wave3 + FAKE_S[(sensorNum + 3) % NUM_SENSORS] * wave4;
+  }
+  counterFakeTime++;
+}
+
 void setup() {
   Serial.begin(9600); //This line tells the Serial port to begin communicating at 9600 bauds
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
@@ -75,6 +102,7 @@ void setup() {
     pinMode(SENSOR_3_PIN, INPUT);
     digitalWrite(SENSOR_3_PIN, LOW);
   */
+  randomSeed(SENSOR_PIN[0]);
 }
 
 // Takes weighted average, weight shape depending on factors defined at the top
@@ -153,8 +181,12 @@ void loop() {
   }
   // obtain raw rms
   double rms_raw_s[NUM_SENSORS];
-  for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
-    rms_raw_s[sensorNum] = BIAS_S[sensorNum] * sqrt(sumSquares_s[sensorNum] / NUM_SAMPLES);
+  if (FAKE_INPUT) {
+    randWave(rms_raw_s);
+  } else {
+    for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
+      rms_raw_s[sensorNum] = BIAS_S[sensorNum] * sqrt(sumSquares_s[sensorNum] / NUM_SAMPLES);
+    }
   }
   // print raw rms
   if (PRINT_RMS_RAW) printArray(rms_raw_s);
