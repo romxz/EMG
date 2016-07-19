@@ -24,20 +24,30 @@ double sensorVal[NUM_SENSORS];
 double array_rms_s[NUM_SENSORS][AVG_WINDOW_SIZE];
 int counterArray = 0;
 
+// Decaying Max parameters
+#define DECAY_MIN 0.001
+double decaying_max[] = {DECAY_MIN, DECAY_MIN, DECAY_MIN, DECAY_MIN};
+#define USE_DECAY_MAX true
+#define DECAY_MAX_CONST 0
+#define DECAY_MAX_LIN 1.0
+#define DECAY_MAX_SQ 0
+#define DECAY_MAX_ROOT 0
+
 // Averaged window memory shape factors:
-#define AVG_CONST_FACTOR 0
-#define AVG_LIN_FACTOR 1
-#define AVG_SQ_FACTOR 0
-#define AVG_ROOT_FACTOR 0
+#define AVG_MEM_CONST 0
+#define AVG_MEM_LIN 1.0
+#define AVG_MEM_SQ 0
+#define AVG_MEM_ROOT 0
 
 // Variables for 4 sensor signal manipulation:
 #define AMPLIFY_DIFF 1
 #define AMPLIFY_DIFF_RADIUS 0
 #define RMS_AVG_AMP_MOD 0.5
 
-// Print Modes
+// Print Modes and Parameters
 #define PRINT_RMS_RAW false
 #define PRINT_RMS_AVG false
+#define PRINT_RMS_MAX_DECAY false
 #define PRINT_RMS_DIFF false
 #define PRINT_RMS_MOD false
 #define PRINT_RMS_LOG true
@@ -45,6 +55,7 @@ int counterArray = 0;
 #define PRINT_DELAY 0.001
 #define SEE_WAVEFORM_OLD false
 
+// Log Output parameters
 #define RMS_MOD_MIN_RANGE 0.001 // Keep modulated rms output above this value
 #define LOG_MAX_RANGE 6 // Keep log output below this value
 
@@ -68,18 +79,19 @@ void setup() {
 
 // Takes weighted average, weight shape depending on factors defined at the top
 double window_weighted_avg(double a[], int index) {
-  double array_weighted_avg = a[index] * (AVG_CONST_FACTOR + AVG_ROOT_FACTOR * sqrt(AVG_WINDOW_SIZE) + AVG_LIN_FACTOR * AVG_WINDOW_SIZE + AVG_SQ_FACTOR * sq(AVG_WINDOW_SIZE));
+  double array_weighted_avg = a[index] * (AVG_MEM_CONST + AVG_MEM_ROOT * sqrt(AVG_WINDOW_SIZE) + AVG_MEM_LIN * AVG_WINDOW_SIZE + AVG_MEM_SQ * sq(AVG_WINDOW_SIZE));
   for (int ishift = 1; ishift < AVG_WINDOW_SIZE; ishift++) {
     index = index - 1;
     if (index < 0) {
       index = AVG_WINDOW_SIZE - 1;
     }
-    array_weighted_avg = array_weighted_avg + a[index] * (AVG_CONST_FACTOR + AVG_ROOT_FACTOR * sqrt(AVG_WINDOW_SIZE - ishift) + AVG_LIN_FACTOR * (AVG_WINDOW_SIZE - ishift) + AVG_SQ_FACTOR * sq(AVG_WINDOW_SIZE - ishift));
+    array_weighted_avg = array_weighted_avg + a[index] * (AVG_MEM_CONST + AVG_MEM_ROOT * sqrt(AVG_WINDOW_SIZE - ishift) + AVG_MEM_LIN * (AVG_WINDOW_SIZE - ishift) + AVG_MEM_SQ * sq(AVG_WINDOW_SIZE - ishift));
   }
-  array_weighted_avg = array_weighted_avg / (AVG_WINDOW_SIZE * (AVG_CONST_FACTOR + 0.6 * AVG_ROOT_FACTOR * sqrt(AVG_WINDOW_SIZE) + 0.5 * AVG_LIN_FACTOR * AVG_WINDOW_SIZE + 0.3 * AVG_SQ_FACTOR * sq(AVG_WINDOW_SIZE)));
+  array_weighted_avg = array_weighted_avg / (AVG_WINDOW_SIZE * (AVG_MEM_CONST + 0.6 * AVG_MEM_ROOT * sqrt(AVG_WINDOW_SIZE) + 0.5 * AVG_MEM_LIN * AVG_WINDOW_SIZE + 0.3 * AVG_MEM_SQ * sq(AVG_WINDOW_SIZE)));
   return array_weighted_avg;
 }
 
+// Returns max value of input array
 double array_max(double a[]) {
   double max_value = 0.0;
   for (int i = 0; i < AVG_WINDOW_SIZE; i++) {
@@ -88,6 +100,7 @@ double array_max(double a[]) {
   return max_value;
 }
 
+// Prints data contents of array holding sensor input
 void printArray(double a[]) {
   if (SEE_WAVEFORM_OLD) {
     if (NUM_SENSORS > 1) {
@@ -159,6 +172,21 @@ void loop() {
   if (PRINT_RMS_AVG) printArray(rms_avg_s);
 
   // *** Manipulating 4-sensor signal ***
+  // decaying max
+  if (USE_DECAY_MAX) {
+    double decaying_max[NUM_SENSORS];
+    for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
+      if (rms_avg_s[sensorNum] > decaying_max[sensorNum]) {
+        decaying_max[sensorNum] = rms_avg_s[sensorNum];
+      }
+      rms_avg_s[sensorNum] = decaying_max[sensorNum];
+      decaying_max[sensorNum] = decaying_max[sensorNum] - (DECAY_MAX_CONST + DECAY_MAX_LIN * decaying_max[sensorNum] + DECAY_MAX_SQ * sq(decaying_max[sensorNum]) + DECAY_MAX_ROOT * sqrt(decaying_max[sensorNum]));
+      decaying_max[sensorNum] = max(decaying_max[sensorNum], DECAY_MIN);
+    }
+    // print decaying max
+    if (PRINT_RMS_MAX_DECAY) printArray(decaying_max);
+  }
+
   // signal strength norm
   double rms_radius_norm = 0.0;
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
