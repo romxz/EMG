@@ -289,18 +289,23 @@ while time2 - time1 < time_run:
 num1 = datetime.datetime.now().date() 
 num2 = datetime.datetime.now().time() 
 num =  num1.isoformat() + "..." + num2.isoformat()
+num3 = str(datetime.datetime.now().date().isoformat()).replace("-",".")
 num = (str(num).replace(":","-"))
 num = (str(num).replace("-","."))
 
+newpath = ('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\'+num3) 
+if not os.path.exists(newpath):
+    os.makedirs(newpath)
+
 if store_data == True:
     #change save location below
-    with open('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\test' + num + '.csv', 'w', newline='') as csvfile:
+    with open("newpath" + '\\test' + num + '.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=' ',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for i in all_data:
             writer.writerow(i)
     print ("Saved as CSV")
-            
+    
 """ 3. Fuzzy C Means """
 
 alldata = np.transpose(np.asarray(all_data[1:]))
@@ -351,8 +356,8 @@ if cent_lines == True:
 """ 6. Save as PNG """
 
 if store_image == True:
-    plt.savefig('C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles\\fig' + num + '.png')
-    print ("figure saved as: "+ 'C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\csvfiles\\fig' + num + '.png')
+    plt.savefig("newpath" + "\\fig"  + num + '.png')
+    print ("Saved as PNG")
 
 """ 7. Plot Reset """
 
