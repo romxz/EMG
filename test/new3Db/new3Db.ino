@@ -5,13 +5,14 @@
 */
 // Sensors
 #define NUM_SENSORS 4
-const int SENSOR_PIN[] = {A2, A3, A4, A5};
+const int SENSOR_PIN[] = {A2, A3, A4, A5}; // Input pin aliases
 /*
   #define SENSOR_0_PIN A2
   #define SENSOR_1_PIN A3
   #define SENSOR_2_PIN A4
   #define SENSOR_3_PIN A5
 */
+const double BIAS_S[] = {1.0, 1.0, 1.0, 1.0}; // Bias for each raw channel
 
 // Array to store input reads from analog
 double sensorVal[NUM_SENSORS];
@@ -22,12 +23,6 @@ double sensorVal[NUM_SENSORS];
 #define AVG_WINDOW_SIZE 50 //
 double array_rms_s[NUM_SENSORS][AVG_WINDOW_SIZE];
 int counterArray = 0;
-
-// Bias for each raw channel
-#define BIAS_S0 1
-#define BIAS_S1 1
-#define BIAS_S2 1
-#define BIAS_S3 1
 
 // Averaged window memory shape factors:
 #define AVG_CONST_FACTOR 0
@@ -146,7 +141,7 @@ void loop() {
   // obtain raw rms
   double rms_raw_s[NUM_SENSORS];
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
-    rms_raw_s[sensorNum] = sqrt(sumSquares_s[sensorNum] / NUM_SAMPLES);
+    rms_raw_s[sensorNum] = BIAS_S[sensorNum] * sqrt(sumSquares_s[sensorNum] / NUM_SAMPLES);
   }
   // print raw rms
   if (PRINT_RMS_RAW) printArray(rms_raw_s);
