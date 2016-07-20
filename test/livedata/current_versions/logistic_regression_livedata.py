@@ -131,7 +131,7 @@ converted = False  #for 3D
     
 """ 6. Serial """
 
-ser = serial.Serial(port='COM10',baudrate=9600,timeout=None)
+ser = serial.Serial(port='COM6',baudrate=9600,timeout=None)
 print("connected to: " + ser.portstr)
 
 """ 7. Plot """
@@ -167,20 +167,22 @@ while cont_mode:
         ser.reset_output_buffer()
         
     c = ser.readline()
+    print(c)
     c = (str(c)[2:-5])
     c = c.split(",")
     
     try:
         a = [float(i) for i in c]
     except ValueError:
-        a = a
-    except NameError:
-        if sensor_num == 2:
-            a = [0,0]
-        elif sensor_num == 3:
-            a = [0,0,0]
-        elif sensor_num == 4:
-            a = [0,0,0,0]
+        try:
+            a = a
+        except NameError:
+            if sensor_num == 2:
+                a = [0,0]
+            elif sensor_num == 3:
+                a = [0,0,0]
+            elif sensor_num == 4:
+                a = [0,0,0,0]
         
     if sensor_num == 4:
         if ((len(a) == 4)):
