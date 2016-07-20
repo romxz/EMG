@@ -48,20 +48,20 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 """ 2. Constants """
 
 sensor_num = 2
-time_run = 120
+time_run = 20
 clusters = 4
-xmax = 9
-xmin = 0
-ymax = 9
-ymin = 0
+xmax = 7
+xmin = -2
+ymax = 7
+ymin = -2
 #for 3D
-zmax = 9
-zmin = 0
+zmax = 7
+zmin = -2
 #for 4D
-xmax2 = 9
-xmin2 = 0
-ymax2 = 9
-ymin2 = 0
+xmax2 = 7
+xmin2 = -2
+ymax2 = 7
+ymin2 = -2
 
 colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'w']
 
@@ -97,16 +97,16 @@ def threeDconv(array): #array = 2D matrix (3 rows, N columns)
 
 """ 5. Options """
 
-cont_mode = True
+cont_mode = False
 store_data = False
 store_image = False
-cent_lines = False
-second_loop = False
+cent_lines = True
+second_loop = True
 converted = False  #for 3D
     
 """ 6. Serial """
 
-ser = serial.Serial(port='COM10',baudrate=9600,timeout=None)
+ser = serial.Serial(port='COM6',baudrate=9600,timeout=None)
 print("connected to: " + ser.portstr)
 
 """ 7. Plot """
@@ -148,58 +148,64 @@ while cont_mode:
     try:
         a = [float(i) for i in c]
     except ValueError:
-        a = a
-    except NameError:
-        if sensor_num == 2:
-            a = [0,0]
-        elif sensor_num == 3:
-            a = [0,0,0]
-        elif sensor_num == 4:
-            a = [0,0,0,0]
+        try:
+            a = a
+        except NameError:
+            if sensor_num == 2:
+                a = [0.1,0.1]
+            elif sensor_num == 3:
+                a = [0.1,0.1,0.1]
+            elif sensor_num == 4:
+                a = [0.1,0.1,0.1,0.1]
         
     if sensor_num == 4:
         if ((len(a) == 4)):
-            x1 = float(a[0])
-            y1 = float(a[1])
-            x2 = float(a[2])
-            y2 = float(a[3])
-            ax1.scatter(x1,y1,s=10, color = "y")
-            ax2.scatter(x2,y2,s=10, color = "y")
-            plt.show()
-            plt.pause(0.000000001)
-            ax1.clear()
-            ax2.clear()
-            ax1.axis([xmin,xmax,ymin,ymax])
-            ax2.axis([xmin2,xmax2,ymin2,ymax2])
+            if (a[0]<xmax and a[0]>xmin and a[1]<ymax and a[1]>ymin and a[2]<xmax2 \
+                and a[2]>xmin2 and a[3]<ymax2 and a[3]>ymin2):
+                x1 = float(a[0])
+                y1 = float(a[1])
+                x2 = float(a[2])
+                y2 = float(a[3])
+                ax1.scatter(x1,y1,s=10, color = "y")
+                ax2.scatter(x2,y2,s=10, color = "y")
+                plt.show()
+                plt.pause(0.000000001)
+                ax1.clear()
+                ax2.clear()
+                ax1.axis([xmin,xmax,ymin,ymax])
+                ax2.axis([xmin2,xmax2,ymin2,ymax2])
                     
     elif sensor_num == 3:
         if ((len(a) == 3)):
-            x = float(a[0])
-            y = float(a[1])
-            z = float(a[2])
-                
-            if converted:  
-                converted_xyz = threeDconv([[x],[y],[z]])
-                x = converted_xyz[0][0]
-                y = converted_xyz[1][0]
-                z = converted_xyz[2][0]
-    
-            ax.scatter(x,y,z, c='y', s=10, marker = "o")
-            plt.pause(0.00000001)
-            ax.clear()
-            ax = plt.axes(projection = "3d")
-            ax.set_xlim(xmin,xmax)
-            ax.set_ylim(ymin,ymax)
-            ax.set_zlim(zmin,zmax)
+            if (a[0]<xmax and a[0]>xmin and a[1]<ymax and a[1]>ymin and a[2]<zmax \
+                and a[2]>zmin):
+                x = float(a[0])
+                y = float(a[1])
+                z = float(a[2])
+                    
+                if converted:  
+                    converted_xyz = threeDconv([[x],[y],[z]])
+                    x = converted_xyz[0][0]
+                    y = converted_xyz[1][0]
+                    z = converted_xyz[2][0]
+        
+                ax.scatter(x,y,z, c='y', s=10, marker = "o")
+                plt.pause(0.00000001)
+                ax.clear()
+                ax = plt.axes(projection = "3d")
+                ax.set_xlim(xmin,xmax)
+                ax.set_ylim(ymin,ymax)
+                ax.set_zlim(zmin,zmax)
         
     elif sensor_num == 2: 
-        if ((len(a) == 2)):              
-            x = float(a[0])
-            y = float(a[1])
-            plt.scatter(x,y,s=10, color = "y")
-            plt.pause(0.000000001)
-            plt.clf()
-            plt.axis([xmin,xmax,ymin,ymax])
+        if ((len(a) == 2)): 
+            if (a[0]<xmax and a[0]>xmin and a[1]<ymax and a[1]>ymin):        
+                x = float(a[0])
+                y = float(a[1])
+                plt.scatter(x,y,s=10, color = "y")
+                plt.pause(0.000000001)
+                plt.clf()
+                plt.axis([xmin,xmax,ymin,ymax])
                         
             
     line = []
@@ -222,62 +228,68 @@ while time2 - time1 < time_run:
     try:
         a = [float(i) for i in c]
     except ValueError:
-        a = a
-    except NameError:
-        if sensor_num == 2:
-            a = [0,0]
-        elif sensor_num == 3:
-            a = [0,0,0]
-        elif sensor_num == 4:
-            a = [0,0,0,0]
-        
+        try:
+            a = a
+        except NameError:
+            if sensor_num == 2:
+                a = [0.1,0.1]
+            elif sensor_num == 3:
+                a = [0.1,0.1,0.1]
+            elif sensor_num == 4:
+                a = [0.1,0.1,0.1,0.1]
+            
     if sensor_num == 4:
         if ((len(a) == 4)):
-            x1 = float(a[0])
-            y1 = float(a[1])
-            x2 = float(a[2])
-            y2 = float(a[3])
-            all_data.append([x1,y1,x2,y2])
-            ax1.scatter(x1,y1,s=10, color = "y")
-            ax2.scatter(x2,y2,s=10, color = "y")
-            plt.show()
-            plt.pause(0.000000001)
-            ax1.clear()
-            ax2.clear()
-            ax1.axis([xmin,xmax,ymin,ymax])
-            ax2.axis([xmin2,xmax2,ymin2,ymax2])
+            if (a[0]<xmax and a[0]>xmin and a[1]<ymax and a[1]>ymin and a[2]<xmax2 \
+                and a[2]>xmin2 and a[3]<ymax2 and a[3]>ymin2):
+                x1 = float(a[0])
+                y1 = float(a[1])
+                x2 = float(a[2])
+                y2 = float(a[3])
+                all_data.append([x1,y1,x2,y2])
+                ax1.scatter(x1,y1,s=10, color = "y")
+                ax2.scatter(x2,y2,s=10, color = "y")
+                plt.show()
+                plt.pause(0.000001)
+                # ax1.clear()
+                # ax2.clear()
+                # ax1.axis([xmin,xmax,ymin,ymax])
+                # ax2.axis([xmin2,xmax2,ymin2,ymax2])
                     
     elif sensor_num == 3:
-        if ((len(a) == 3)):
-            x = float(a[0])
-            y = float(a[1])
-            z = float(a[2])
+        if (a[0]<xmax and a[0]>xmin and a[1]<ymax and a[1]>ymin and a[2]<zmax \
+            and a[2]>zmin):
+            if ((len(a) == 3)):
+                x = float(a[0])
+                y = float(a[1])
+                z = float(a[2])
+                    
+                if converted:  
+                    converted_xyz = threeDconv([[x],[y],[z]])
+                    x = converted_xyz[0][0]
+                    y = converted_xyz[1][0]
+                    z = converted_xyz[2][0]
                 
-            if converted:  
-                converted_xyz = threeDconv([[x],[y],[z]])
-                x = converted_xyz[0][0]
-                y = converted_xyz[1][0]
-                z = converted_xyz[2][0]
-            
-            all_data.append([x,y,z])
-            ax.scatter(x,y,z, c='y', s=10, marker = "o")
-            plt.pause(0.00000001)
-            ax.clear()
-            ax = plt.axes(projection = "3d")
-            ax.set_xlim(xmin,xmax)
-            ax.set_ylim(ymin,ymax)
-            ax.set_zlim(zmin,zmax)
+                all_data.append([x,y,z])
+                ax.scatter(x,y,z, c='y', s=10, marker = "o")
+                plt.pause(0.00000001)
+                # ax.clear()
+                # ax = plt.axes(projection = "3d")
+                # ax.set_xlim(xmin,xmax)
+                # ax.set_ylim(ymin,ymax)
+                # ax.set_zlim(zmin,zmax)
         
     elif sensor_num == 2:   
-        if ((len(a) == 2)):            
-            x = float(a[0])
-            y = float(a[1])
-            all_data.append([x,y])
-            plt.scatter(x,y,s=10, color = "y")
-            plt.pause(0.000000001)
-            plt.clf()
-            plt.axis([xmin,xmax,ymin,ymax])
-                        
+        if ((len(a) == 2)):   
+            if (a[0]<xmax and a[0]>xmin and a[1]<ymax and a[1]>ymin):  
+                x = float(a[0])
+                y = float(a[1])
+                all_data.append([x,y])
+                plt.scatter(x,y,s=10, color = "y")
+                plt.pause(0.000000001)
+                # plt.clf()
+                # plt.axis([xmin,xmax,ymin,ymax])
+                #             
             
     line = []
     time2 = time.time()
@@ -315,12 +327,27 @@ cluster_membership = np.argmax(u, axis=0)
 
 """ 4. Clusters """
 
+if sensor_num == 2:
+    fig2 = plt.figure(2)
+    plt.axis([xmin,xmax,ymin,ymax])
+elif sensor_num == 3:
+    fig2 = plt.figure(2)
+    ax = plt.axes(projection = "3d")
+    ax.set_xlim(xmin,xmax)
+    ax.set_ylim(ymin,ymax)
+    ax.set_zlim(zmin,zmax)
+elif sensor_num == 4:
+    fig2, (ax5, ax6) = plt.subplots(1, 2, figsize = (16,8))
+    ax5.axis([xmin,xmax,ymin,ymax])
+    ax6.axis([xmin2,xmax2,ymin2,ymax2])
+plt.ion()
+
 for j in range(clusters):
     
     if sensor_num == 2:
         for i in range(len(cluster_membership)):
             if cluster_membership[i] == j:
-                plt.plot(x_val[i], y_val[i], '.', color = colors[j])
+                plt.plot(alldata[0][i], alldata[1][i], '.', color = colors[j])
         plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
         
     if sensor_num == 3:
@@ -332,10 +359,10 @@ for j in range(clusters):
     if sensor_num == 4:
         for i in range(len(cluster_membership)):
             if cluster_membership[i] == j:
-                ax1.plot(alldata[0][i], alldata[1][i], '.', color = colors[j])
-                ax2.plot(alldata[2][i], alldata[3][i], '.', color = colors[j])
-        ax1.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
-        ax2.plot(cntr[j][2], cntr[j][3], colors[j]+"s")
+                ax5.plot(alldata[0][i], alldata[1][i], '.', color = colors[j])
+                ax6.plot(alldata[2][i], alldata[3][i], '.', color = colors[j])
+        ax5.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+        ax6.plot(cntr[j][2], cntr[j][3], colors[j]+"s")
 
 """ 5. Centroid Lines """
 
@@ -350,8 +377,8 @@ if cent_lines == True:
                 ax.plot([point[0], point2[0]], [point[1], point2[1]], [point[2], point2[2]],"-b")
                 
             elif sensor_num == 4:
-                ax1.plot([point[0], point2[0]], [point[1], point2[1]],"-b")
-                ax2.plot([point[2], point2[2]], [point[3], point2[3]],"-b")
+                ax5.plot([point[0], point2[0]], [point[1], point2[1]],"-b")
+                ax6.plot([point[2], point2[2]], [point[3], point2[3]],"-b")
                 
 """ 6. Save as PNG """
 
@@ -400,83 +427,90 @@ if second_loop == True:
         try:
             a = [float(i) for i in c]
         except ValueError:
-            a = a
-        except NameError:
-            if sensor_num == 2:
-                a = [0,0]
-            elif sensor_num == 3:
-                a = [0,0,0]
-            elif sensor_num == 4:
-                a = [0,0,0,0]
-                
+            try:
+                a = a
+            except NameError:
+                if sensor_num == 2:
+                    a = [0.1,0.1]
+                elif sensor_num == 3:
+                    a = [0.1,0.1,0.1]
+                elif sensor_num == 4:
+                    a = [0.1,0.1,0.1,0.1]
+                    
         if sensor_num == 4:
             if ((len(a) == 4)):
-                x1 = float(a[0])
-                y1 = float(a[1])
-                x2 = float(a[2])
-                y2 = float(a[3])
-                a_array = np.asarray([[x1], [y1], [x2], [y2]])
-                v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
-                cluster_num = np.argmax(v[0], axis = 0)
-                cluster_num = int(cluster_num)
-                ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
-                ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
-                plt.pause(0.000000001)
-                plt.pause(0.000000001)
-                ax3.clear()
-                ax4.clear()
-                ax3.axis([xmin,xmax,ymin,ymax])
-                ax4.axis([xmin2,xmax2,ymin2,ymax2])
-                for j in range(clusters):              
-                    ax3.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
-                    ax4.plot(cntr[j][2], cntr[j][3], colors[j]+"s")
+                if (a[0]<xmax and a[0]>xmin and a[1]<ymax and a[1]>ymin and a[2]<xmax2 \
+                    and a[2]>xmin2 and a[3]<ymax2 and a[3]>ymin2):
+                    x1 = float(a[0])
+                    y1 = float(a[1])
+                    x2 = float(a[2])
+                    y2 = float(a[3])
+                    a_array = np.asarray([[x1], [y1], [x2], [y2]])
+                    v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
+                    cluster_num = np.argmax(v[0], axis = 0)
+                    cluster_num = int(cluster_num)
+                    ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
+                    ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
+                    plt.pause(0.000000001)
+                    plt.pause(0.000000001)
+                    ax3.clear()
+                    ax4.clear()
+                    ax3.axis([xmin,xmax,ymin,ymax])
+                    ax4.axis([xmin2,xmax2,ymin2,ymax2])
+                    for j in range(clusters):              
+                        ax3.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+                        ax4.plot(cntr[j][2], cntr[j][3], colors[j]+"s")
         
         elif sensor_num == 3:
-            if ((len(a) == 3)):
-                x = float(a[0])
-                y = float(a[1])
-                z = float(a[2])
-                
-                if converted:
-                    converted_xyz = threeDconv([[x],[y],[z]])
-                    x = converted_xyz[0][0]
-                    y = converted_xyz[1][0]
-                    z = converted_xyz[2][0]
+            if (a[0]<xmax and a[0]>xmin and a[1]<ymax and a[1]>ymin and a[2]<zmax \
+                and a[2]>zmin):
+                if ((len(a) == 3)):
+                    x = float(a[0])
+                    y = float(a[1])
+                    z = float(a[2])
                     
-                a_array = np.asarray([[x], [y], [z]])
-                v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
-                cluster_num = np.argmax(v[0], axis = 0)
-                cluster_num = int(cluster_num)
-                ax.set_xlim(xmin,xmax)
-                ax.set_ylim(ymin,ymax)
-                ax.set_zlim(zmin,zmax)
-                ax.scatter(x,y,z,s=40, c = colors[cluster_num])
-                plt.pause(0.000000001)
-                ax.clear()
-                ax.set_xlim(xmin,xmax)
-                ax.set_ylim(ymin,ymax)
-                ax.set_zlim(zmin,zmax)
-                fig1 = plt.figure(1)
-                ax = plt.axes(projection = "3d")
-                for j in range(clusters):            
-                    ax.scatter(cntr[j][0], cntr[j][1], cntr[j][2], c = colors[j], marker = "s", s = 50)
-    
+                    if converted:
+                        converted_xyz = threeDconv([[x],[y],[z]])
+                        x = converted_xyz[0][0]
+                        y = converted_xyz[1][0]
+                        z = converted_xyz[2][0]
+                        
+                    a_array = np.asarray([[x], [y], [z]])
+                    v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
+                    cluster_num = np.argmax(v[0], axis = 0)
+                    cluster_num = int(cluster_num)
+                    ax.set_xlim(xmin,xmax)
+                    ax.set_ylim(ymin,ymax)
+                    ax.set_zlim(zmin,zmax)
+                    ax.scatter(x,y,z,s=40, c = colors[cluster_num])
+                    plt.pause(0.000000001)
+                    ax.clear()
+                    ax.set_xlim(xmin,xmax)
+                    ax.set_ylim(ymin,ymax)
+                    ax.set_zlim(zmin,zmax)
+                    fig1 = plt.figure(1)
+                    ax = plt.axes(projection = "3d")
+                    for j in range(clusters):            
+                        ax.scatter(cntr[j][0], cntr[j][1], cntr[j][2], c = colors[j], marker = "s", s = 50)
+        
         elif sensor_num == 2:
             if ((len(a) == 2)):
-                x = float(a[0])
-                y = float(a[1])
-
-                a_array = np.asarray([[x], [y]])
-                v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
-                cluster_num = np.argmax(v[0], axis = 0)
-                cluster_num = int(cluster_num)
-                plt.scatter(x,y,s=40, c = colors[cluster_num])
-                plt.pause(0.000000001)
-                plt.clf()
-                for j in range(clusters):   
-                    plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
-
-                    
+                if (a[0]<xmax and a[0]>xmin and a[1]<ymax and a[1]>ymin):
+                    x = float(a[0])
+                    y = float(a[1])
+    
+                    a_array = np.asarray([[x], [y]])
+                    v = fuzz.cluster.cmeans_predict(a_array, cntr, 2, error = 0.0005, maxiter = 10000)
+                    cluster_num = np.argmax(v[0], axis = 0)
+                    cluster_num = int(cluster_num)
+                    plt.scatter(x,y,s=40, c = colors[cluster_num])
+                    plt.pause(0.000000001)
+                    plt.clf()
+                    plt.axis([xmin,xmax,ymin,ymax])
+                    for j in range(clusters):   
+                        plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+    
+                        
                         
         line = []
 

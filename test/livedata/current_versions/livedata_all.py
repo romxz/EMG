@@ -47,8 +47,8 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 
 """ 2. Constants """
 
-sensor_num = 2
-time_run = 120
+sensor_num = 4
+time_run = 5
 clusters = 4
 xmax = 9
 xmin = 0
@@ -97,16 +97,16 @@ def threeDconv(array): #array = 2D matrix (3 rows, N columns)
 
 """ 5. Options """
 
-cont_mode = True
+cont_mode = False
 store_data = False
 store_image = False
-cent_lines = False
-second_loop = False
+cent_lines = True
+second_loop = True
 converted = False  #for 3D
     
 """ 6. Serial """
 
-ser = serial.Serial(port='COM10',baudrate=9600,timeout=None)
+ser = serial.Serial(port='COM6',baudrate=9600,timeout=None)
 print("connected to: " + ser.portstr)
 
 """ 7. Plot """
@@ -289,12 +289,27 @@ cluster_membership = np.argmax(u, axis=0)
 
 """ 4. Clusters """
 
+if sensor_num == 2:
+    fig2 = plt.figure(2)
+    plt.axis([xmin,xmax,ymin,ymax])
+elif sensor_num == 3:
+    fig2 = plt.figure(2)
+    ax = plt.axes(projection = "3d")
+    ax.set_xlim(xmin,xmax)
+    ax.set_ylim(ymin,ymax)
+    ax.set_zlim(zmin,zmax)
+elif sensor_num == 4:
+    fig2, (ax5, ax6) = plt.subplots(1, 2, figsize = (16,8))
+    ax5.axis([xmin,xmax,ymin,ymax])
+    ax6.axis([xmin2,xmax2,ymin2,ymax2])
+plt.ion()
+
 for j in range(clusters):
     
     if sensor_num == 2:
         for i in range(len(cluster_membership)):
             if cluster_membership[i] == j:
-                plt.plot(x_val[i], y_val[i], '.', color = colors[j])
+                plt.plot(alldata[0][i], alldata[1][i], '.', color = colors[j])
         plt.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
         
     if sensor_num == 3:
@@ -306,10 +321,10 @@ for j in range(clusters):
     if sensor_num == 4:
         for i in range(len(cluster_membership)):
             if cluster_membership[i] == j:
-                ax1.plot(alldata[0][i], alldata[1][i], '.', color = colors[j])
-                ax2.plot(alldata[2][i], alldata[3][i], '.', color = colors[j])
-        ax1.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
-        ax2.plot(cntr[j][2], cntr[j][3], colors[j]+"s")
+                ax5.plot(alldata[0][i], alldata[1][i], '.', color = colors[j])
+                ax6.plot(alldata[2][i], alldata[3][i], '.', color = colors[j])
+        ax5.plot(cntr[j][0], cntr[j][1], colors[j]+"s")
+        ax6.plot(cntr[j][2], cntr[j][3], colors[j]+"s")
 
 """ 5. Centroid Lines """
 
@@ -324,8 +339,8 @@ if cent_lines == True:
                 ax.plot([point[0], point2[0]], [point[1], point2[1]], [point[2], point2[2]],"-b")
                 
             elif sensor_num == 4:
-                ax1.plot([point[0], point2[0]], [point[1], point2[1]],"-b")
-                ax2.plot([point[2], point2[2]], [point[3], point2[3]],"-b")
+                ax5.plot([point[0], point2[0]], [point[1], point2[1]],"-b")
+                ax6.plot([point[2], point2[2]], [point[3], point2[3]],"-b")
                 
 """ 6. Save as PNG """
 

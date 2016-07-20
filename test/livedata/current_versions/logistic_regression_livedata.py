@@ -45,21 +45,21 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 
 """ 2. Constants """
 
-sensor_num = 4
-motion_time = 120
-motion_num = 4
-xmax = 9
-xmin = 0
-ymax = 9
-ymin = 0
+sensor_num = 2
+motion_time = 2
+motion_num = 5
+xmax = 6
+xmin = -1
+ymax = 6
+ymin = -1
 #for 3D
-zmax = 9
-zmin = 0
+zmax = 6
+zmin = -1
 #for 4D
-xmax2 = 9
-xmin2 = 0
-ymax2 = 9
-ymin2 = 0
+xmax2 = 6
+xmin2 = -1
+ymax2 = 6
+ymin2 = -1
 colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'w']
 
 
@@ -111,8 +111,8 @@ def costfunc(theta,x,y):
     m,n = x.shape
     theta = theta.reshape((n,1))
     y = y.reshape((m,1))
-    term1 = np.log(sigmoid(x.dot(theta)))
-    term2 = np.log(1-sigmoid(x.dot(theta)))
+    term1 = np.log(sigmoid(x.dot(theta))+0.00001)
+    term2 = np.log(1-sigmoid(x.dot(theta))+0.00001)
     term1 = term1.reshape((m,1))
     term2 = term2.reshape((m,1))
     term = y * term1 + (1 - y) * term2
@@ -126,7 +126,7 @@ def costfunc(theta,x,y):
 cont_mode = True
 store_data = False
 store_image = False
-second_loop = False
+second_loop = True
 converted = False  #for 3D
     
 """ 6. Serial """
@@ -178,11 +178,11 @@ while cont_mode:
             a = a
         except NameError:
             if sensor_num == 2:
-                a = [0,0]
+                a = [0.1,0.1]
             elif sensor_num == 3:
-                a = [0,0,0]
+                a = [0.1,0.1,0.1]
             elif sensor_num == 4:
-                a = [0,0,0,0]
+                a = [0.1,0.1,0.1,0.1]
         
     if sensor_num == 4:
         if ((len(a) == 4)):
@@ -237,7 +237,7 @@ while cont_mode:
 while current_motion_num < motion_num:
     time1 = time.time()
     time2 = time.time()
-    
+    index = 0
     while time2 - time1 < motion_time:
         if index>=20:
             ser.reset_input_buffer()
@@ -250,14 +250,15 @@ while current_motion_num < motion_num:
         try:
             a = [float(i) for i in c]
         except ValueError:
-            a = a
-        except NameError:
-            if sensor_num == 2:
-                a = [0,0]
-            elif sensor_num == 3:
-                a = [0,0,0]
-            elif sensor_num == 4:
-                a = [0,0,0,0]
+            try:
+                a = a
+            except NameError:
+                if sensor_num == 2:
+                    a = [0.1,0.1]
+                elif sensor_num == 3:
+                    a = [0.1,0.1,0.1]
+                elif sensor_num == 4:
+                    a = [0.1,0.1,0.1,0.1]
             
         if sensor_num == 4:
             if ((len(a) == 4)):
@@ -299,7 +300,12 @@ while current_motion_num < motion_num:
         line = []
         index += 1
         time2 = time.time()
-    input("Motion has finished. Please press enter to continue")
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
+    #input("Motion has finished. Please press enter to continue")
+    ser.reset_input_buffer()
+    ser.reset_output_buffer()
+            
     current_motion_num += 1
 print("Recording has completed.")
     
@@ -333,6 +339,8 @@ if store_image == True:
     
 """ 4. Multiclass Logistic Regression """
 
+
+
 y_vec = [] 
 x_mat = []
 all_data = all_data[1:]
@@ -361,6 +369,7 @@ for i in range(motion_num):
     
         y_vec.append([all_data[i][-1]])
 
+
 """ 5. Plot Reset """
 
 if sensor_num == 2:
@@ -379,7 +388,6 @@ elif sensor_num == 4:
 plt.ion()
 
 
-
 """ C. CONTINUOUS DATA TRACKING """
 
 if second_loop == True:
@@ -395,15 +403,16 @@ if second_loop == True:
         try:
             a = [float(i) for i in c]
         except ValueError:
-            a = a
-        except NameError:
-            if sensor_num == 2:
-                a = [0,0]
-            elif sensor_num == 3:
-                a = [0,0,0]
-            elif sensor_num == 4:
-                a = [0,0,0,0]
-                
+            try:
+                a = a
+            except NameError:
+                if sensor_num == 2:
+                    a = [0.1,0.1]
+                elif sensor_num == 3:
+                    a = [0.1,0.1,0.1]
+                elif sensor_num == 4:
+                    a = [0.1,0.1,0.1,0.1]
+                    
         if sensor_num == 4:
             if ((len(a) == 4)):
                 x1 = float(a[0])
@@ -418,7 +427,7 @@ if second_loop == True:
                 
                 ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
                 ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
-                plt.pause(0.00001)
+                plt.pause(0.0000001)
                 ax3.clear()
                 ax4.clear()
                 ax3.axis([xmin,xmax,ymin,ymax])
@@ -437,17 +446,18 @@ if second_loop == True:
                     z = converted_xyz[2][0]
                     
                 for i in range(motion_num):
-                    probabilities.append(np.dot(np.array([[x1],[y1],[x2],[y2]]),optimal_theta[i]))
+                    probabilities.append(sigmoid(np.dot(np.array([optimal_theta[i]]),np.array([[x],[y],[z]]))))
                 
                 cluster_num = np.argmax(probabilities)
                 
                 ax.scatter(x,y,z,s=40, c = colors[cluster_num])
                 plt.pause(0.00001)
                 ax.clear()
+                ax = plt.axes(projection = "3d")
                 ax.set_xlim(xmin,xmax)
                 ax.set_ylim(ymin,ymax)
                 ax.set_zlim(zmin,zmax)
-                ax = plt.axes(projection = "3d")
+                
                 
     
         elif sensor_num == 2:
@@ -456,7 +466,7 @@ if second_loop == True:
                 y = float(a[1])
 
                 for i in range(motion_num):
-                    probabilities.append(np.dot(np.array([[x1],[y1],[x2],[y2]]),optimal_theta[i]))
+                    probabilities.append(sigmoid(np.dot(np.array([optimal_theta[i]]),np.array([[x],[y]]))))
                 
                 cluster_num = np.argmax(probabilities)
                
@@ -469,6 +479,7 @@ if second_loop == True:
                     
                         
         line = []
+        probabilities = []
 
 
 ser.close()
