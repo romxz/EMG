@@ -48,7 +48,7 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 """ 2. Constants """
 
 sensor_num = 4
-motion_time = 5
+motion_time = 60
 motion_num = 4
 xmax = 9
 xmin = 0
