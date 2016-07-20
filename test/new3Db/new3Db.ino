@@ -6,12 +6,6 @@
 // Sensors
 #define NUM_SENSORS 4
 const int SENSOR_PIN[] = {A2, A3, A4, A5}; // Input pin aliases
-/*
-  #define SENSOR_0_PIN A2
-  #define SENSOR_1_PIN A3
-  #define SENSOR_2_PIN A4
-  #define SENSOR_3_PIN A5
-*/
 const double BIAS_S[] = {1.0, 1.0, 1.0, 1.0}; // Bias for each raw channel
 
 // Array to store input reads from analog
@@ -27,45 +21,52 @@ int counterArray = 0;
 // Decaying Max parameters
 #define DECAY_MIN 0.001
 double decaying_max[] = {DECAY_MIN, DECAY_MIN, DECAY_MIN, DECAY_MIN};
-#define USE_DECAY_MAX true
-#define DECAY_MAX_CONST 0
-#define DECAY_MAX_LIN 1.0
+#define DECAY_MAX_CONST 10
+#define DECAY_MAX_LIN 0.001
 #define DECAY_MAX_SQ 0
-#define DECAY_MAX_ROOT 0
+#define DECAY_MAX_ROOT 0.1
 
 // Averaged window memory shape factors:
-#define AVG_MEM_CONST 0
-#define AVG_MEM_LIN 1.0
+#define AVG_MEM_CONST 1.0
+#define AVG_MEM_LIN 0
 #define AVG_MEM_SQ 0
 #define AVG_MEM_ROOT 0
 
 // Variables for 4 sensor signal manipulation:
-#define AMPLIFY_DIFF 1
-#define AMPLIFY_DIFF_RADIUS 0
-#define RMS_AVG_AMP_MOD 0.5
+#define AMPLIFY_DIFF 50
+#define AMPLIFY_DIFF_RADIUS 0.1
+#define RMS_AVG_AMP_MOD 0.9
 
 // Print Modes and Parameters
 #define PRINT_RMS_RAW false
+//#define PRINT_RMS_RAW true
 #define PRINT_RMS_AVG false
+//#define PRINT_RMS_AVG true
+//#define USE_DECAY_MAX false
+#define USE_DECAY_MAX true
 #define PRINT_RMS_MAX_DECAY false
+//#define PRINT_RMS_MAX_DECAY true
 #define PRINT_RMS_DIFF false
-#define PRINT_RMS_MOD false
-#define PRINT_RMS_LOG true
+//#define PRINT_RMS_DIFF true
+//#define PRINT_RMS_MOD false
+#define PRINT_RMS_MOD true
+#define PRINT_RMS_LOG false
+//#define PRINT_RMS_LOG true
 #define PRINT_NUM_DECIMALS 2
 #define PRINT_DELAY 0.001
-#define SEE_WAVEFORM_OLD false
+#define SEE_WAVEFORM_OLD  true //false
+
+// Fake Input Parameters
+#define FAKE_INPUT true
+const double FAKE_S[] = {20.1, 50.1112, 3.14159, 2.71};
+int counterFakeTime = 0;
+#define SPEED_CONSTANT 0.1
+#define ANGLE_PHASE 0.7
+long randNoise;
 
 // Log Output parameters
 #define RMS_MOD_MIN_RANGE 0.001 // Keep modulated rms output above this value
 #define LOG_MAX_RANGE 6 // Keep log output below this value
-
-// Fake Input Parameters
-#define FAKE_INPUT false
-const double FAKE_S[] = {40.1, 5000.1112, 3.14159, 2.71};
-int counterFakeTime = 0;
-#define SPEED_CONSTANT 0.05
-#define ANGLE_PHASE 0.7
-long randNoise;
 
 void randWave(double a[]) {
   randNoise = random(11);
@@ -77,8 +78,8 @@ void randWave(double a[]) {
   randNoise = random(11);
   double wave3 = randNoise / 10.0;
   wave3 = wave3 * sq(sin(SPEED_CONSTANT * counterFakeTime + 2 * ANGLE_PHASE * wave2));
-  randNoise = random(11) / 20.0;
-  double wave4 = randNoise / 10.0;
+  randNoise = random(11);
+  double wave4 = randNoise / 20.0;
   wave4 = (1 + wave4) * sq(sin(SPEED_CONSTANT * counterFakeTime * (1 + wave4) + 3 * ANGLE_PHASE * wave2 + wave3));
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
     a[sensorNum] = FAKE_S[sensorNum] * wave1 + FAKE_S[(sensorNum + 1) % NUM_SENSORS] * wave2 + FAKE_S[(sensorNum + 2) % NUM_SENSORS] * wave3 + FAKE_S[(sensorNum + 3) % NUM_SENSORS] * wave4;
@@ -92,16 +93,6 @@ void setup() {
     pinMode(SENSOR_PIN[sensorNum], INPUT);
     digitalWrite(SENSOR_PIN[sensorNum], LOW);
   }
-  /*
-    pinMode(SENSOR_0_PIN, INPUT);
-    digitalWrite(SENSOR_0_PIN, LOW);
-    pinMode(SENSOR_1_PIN, INPUT);
-    digitalWrite(SENSOR_1_PIN, LOW);
-    pinMode(SENSOR_2_PIN, INPUT);
-    digitalWrite(SENSOR_2_PIN, LOW);
-    pinMode(SENSOR_3_PIN, INPUT);
-    digitalWrite(SENSOR_3_PIN, LOW);
-  */
   randomSeed(SENSOR_PIN[0]);
 }
 
@@ -207,9 +198,10 @@ void loop() {
   // decaying max
   if (USE_DECAY_MAX) {
     for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
-      if (rms_avg_s[sensorNum] > decaying_max[sensorNum]) {
+      decaying_max[sensorNum] = max(rms_avg_s[sensorNum], decaying_max[sensorNum]);
+      /*if (rms_avg_s[sensorNum] > decaying_max[sensorNum]) {
         decaying_max[sensorNum] = rms_avg_s[sensorNum];
-      }
+        }*/
       rms_avg_s[sensorNum] = decaying_max[sensorNum];
       decaying_max[sensorNum] = decaying_max[sensorNum] - (DECAY_MAX_CONST + DECAY_MAX_LIN * decaying_max[sensorNum] + DECAY_MAX_SQ * sq(decaying_max[sensorNum]) + DECAY_MAX_ROOT * sqrt(decaying_max[sensorNum]));
       decaying_max[sensorNum] = max(decaying_max[sensorNum], DECAY_MIN);
@@ -225,13 +217,13 @@ void loop() {
   }
   rms_radius_norm = sqrt(rms_radius_norm);
   // signal difference norm
-  double rms_diff_norm = 0.0;
+  double rms_diff_norm = 1.0;
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
     for (int sensorNumOther = sensorNum + 1; sensorNumOther < NUM_SENSORS; sensorNumOther++) {
       rms_diff_norm = rms_diff_norm + sq(rms_avg_s[sensorNumOther] - rms_avg_s[sensorNum]);
     }
   }
-  rms_diff_norm = sqrt(rms_diff_norm + 1.0);
+  rms_diff_norm = sqrt(rms_diff_norm);
   // relative distance of a channel relative to the other's average
   double rms_diff_s[NUM_SENSORS];
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
