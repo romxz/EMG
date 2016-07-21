@@ -57,12 +57,13 @@ const int PRINT_CHANNEL_S[] = {1, 1, 1, 1};
 
 // Fake Input Parameters
 #define FAKE_INPUT true
-const double FAKE_BIAS_S[] = {2.1, 3.11, 0.52, 5.71};
+const double FAKE_BIAS_S[] = {1.0, 3.11, 0.52, 5.71};
 const double FAKE_CROSSTALK_S[] = {0, 0.1, 0.5, 1};
 int cntFakeTime = 0;
 const double SPEED_ACT_MOD[] = {0.05, 0.056, 0.04, 0.045};
 #define SPEED_CNST_HELD 0.08
 #define ANGLE_PHASE 0.7
+#define ANGLE_PHASE_SLOW 0.001
 
 // Log Output parameters
 #define RMS_MOD_MIN_RANGE 0.001 // Keep modulated rms output above this value
@@ -73,13 +74,13 @@ void randWave(double a[]) {
   long randNoise;
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
     randNoise = random(11);
-    sqwave_s[sensorNum] = sensorNum * ANGLE_PHASE * (1 + randNoise / 50.0)));
+    sqwave_s[sensorNum] = (sensorNum + 1) * ANGLE_PHASE * (1 + randNoise / 50.0);
     randNoise = random(11);
-    sqwave_s[sensorNum] = sq(sin(sqwave_s[sensorNum] + SPEED_CNST_HELD * cntFakeTime * (1 + randNoise / 20.0)));
+    sqwave_s[sensorNum] = sq(sq(sin(sqwave_s[sensorNum] + SPEED_CNST_HELD * cntFakeTime * (1 + randNoise / 20.0))));
     randNoise = random(11);
-    sqwave_s[sensorNum] = FAKE_BIAS_S[sensorNum] * (randNoise / 10.0) * sqwave_s[sensorNum];
+    sqwave_s[sensorNum] = (randNoise / 10.0) * sqwave_s[sensorNum];
     randNoise = random(11);
-    sqwave_s[sensorNum] = sqwave_s[sensorNum] * sq(sin(SPEED_ACT_MOD[sensorNum] * cntFakeTime * (1 + randNoise / 50) + sensorNum * ANGLE_PHASE * (1 + randNoise / 60.0))));
+    sqwave_s[sensorNum] = sqwave_s[sensorNum] * FAKE_BIAS_S[sensorNum] * sq(sq(sin(cntFakeTime * (SPEED_ACT_MOD[sensorNum] * (1 + randNoise / 50) + ANGLE_PHASE_SLOW) + sensorNum * ANGLE_PHASE * (1 + randNoise / 60.0))));
   }
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
     a[sensorNum] = sqwave_s[sensorNum];
