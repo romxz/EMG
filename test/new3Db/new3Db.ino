@@ -21,40 +21,38 @@ int counterArray = 0;
 // Decaying Max parameters
 #define DECAY_MIN 0.001
 double decaying_max[] = {DECAY_MIN, DECAY_MIN, DECAY_MIN, DECAY_MIN};
-#define DECAY_MAX_CONST 10
-#define DECAY_MAX_LIN 0.001
+long decay_cnt = 0;
+#define DECAY_MAX_CONST 0.5
+#define DECAY_MAX_LIN 0
+#define DECAY_MAX_LINLOG 0.05
 #define DECAY_MAX_SQ 0
-#define DECAY_MAX_ROOT 0.1
+#define DECAY_MAX_ROOT 0
+#define DECAY_MAX_LOG 0
+#define DECAY_MAX_AMP 0.001
 
 // Averaged window memory shape factors:
-#define AVG_MEM_CONST 1.0
-#define AVG_MEM_LIN 0
-#define AVG_MEM_SQ 0
-#define AVG_MEM_ROOT 0
+#define AVG_MEM_CONST 0
+#define AVG_MEM_LIN 1.0
+#define AVG_MEM_SQ 1.0
+#define AVG_MEM_ROOT 1.0
 
 // Variables for 4 sensor signal manipulation:
-#define AMPLIFY_DIFF 50
+#define AMPLIFY_DIFF 1.0
 #define AMPLIFY_DIFF_RADIUS 0.1
-#define RMS_AVG_AMP_MOD 0.9
+#define RMS_AVG_AMP_MOD 0.6
 
 // Print Modes and Parameters
-#define PRINT_RMS_RAW false
-//#define PRINT_RMS_RAW true
-#define PRINT_RMS_AVG false
-//#define PRINT_RMS_AVG true
-//#define USE_DECAY_MAX false
-#define USE_DECAY_MAX true
-#define PRINT_RMS_MAX_DECAY false
-//#define PRINT_RMS_MAX_DECAY true
-#define PRINT_RMS_DIFF false
-//#define PRINT_RMS_DIFF true
-//#define PRINT_RMS_MOD false
-#define PRINT_RMS_MOD true
-#define PRINT_RMS_LOG false
-//#define PRINT_RMS_LOG true
+#define PRINT_RMS_RAW 0
+#define PRINT_RMS_AVG 0
+#define USE_DECAY_MAX 1
+#define PRINT_RMS_MAX_DECAY 0
+#define PRINT_RMS_DIFF 0
+#define PRINT_RMS_MOD 1
+#define PRINT_RMS_LOG 0
 #define PRINT_NUM_DECIMALS 2
 #define PRINT_DELAY 0.001
-#define SEE_WAVEFORM_OLD  true //false
+#define SEE_WAVEFORM_OLD 1
+const int PRINT_CHANNEL_S[] = {1, 1, 1, 1};
 
 // Fake Input Parameters
 #define FAKE_INPUT true
@@ -123,19 +121,29 @@ double array_max(double a[]) {
 void printArray(double a[]) {
   if (SEE_WAVEFORM_OLD) {
     if (NUM_SENSORS > 1) {
-      for (int sensorNum = 0; sensorNum < NUM_SENSORS - 1; sensorNum++) {
-        Serial.print(a[sensorNum]);
-        delay(PRINT_DELAY);
-        Serial.print(",");
-        delay(PRINT_DELAY);
+      for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
+        if (PRINT_CHANNEL_S[sensorNum]) {
+          Serial.print(a[sensorNum]);
+          delay(PRINT_DELAY);
+          Serial.print(",");
+          delay(PRINT_DELAY);
+        }
       }
     }
-    Serial.println(a[NUM_SENSORS - 1]);
+    Serial.println("");
     delay(PRINT_DELAY);
   } else {
-    String toPrint = String(a[0], PRINT_NUM_DECIMALS);
+    String toPrint = "";
+    if (PRINT_CHANNEL_S[0]) {
+      String toPrint = String(a[0], PRINT_NUM_DECIMALS);
+    }
     for (int sensorNum = 1; sensorNum < NUM_SENSORS; sensorNum++) {
-      String toPrint = String(toPrint + "," + String(a[sensorNum], PRINT_NUM_DECIMALS));
+      if (PRINT_CHANNEL_S[sensorNum]) {
+        if (toPrint.length() > 0) {
+          String toPrint = String(toPrint + ",");
+        }
+        String toPrint = String(toPrint + String(a[sensorNum], PRINT_NUM_DECIMALS));
+      }
     }
     Serial.println(toPrint);
     delay(PRINT_DELAY);
@@ -156,19 +164,6 @@ void loop() {
       sumSquares_s[sensorNum] = sumSquares_s[sensorNum] + sq(sensorVal[sensorNum]);
       delay(DELAY_TIME_ANALOG);
     }
-    /*
-      sensorVal[0] = analogRead(SENSOR_0_PIN);
-      sumSquares_s[0] = sumSquares_s[0] + sq(sensorVal[0]);
-      delay(DELAY_TIME_ANALOG);
-      sensorVal[1] = analogRead(SENSOR_1_PIN);
-      sumSquares_s[1] = sumSquares_s[1] + sq(sensorVal[1]);
-      delay(DELAY_TIME_ANALOG);
-      sensorVal[2] = analogRead(SENSOR_2_PIN);
-      sumSquares_s[2] = sumSquares_s[2] + sq(sensorVal[2]);
-      delay(DELAY_TIME_ANALOG);
-      sensorVal[3] = analogRead(SENSOR_3_PIN);
-      sumSquares_s[3] = sumSquares_s[3] + sq(sensorVal[3]);
-      delay(DELAY_TIME_ANALOG);*/
   }
   // obtain raw rms
   double rms_raw_s[NUM_SENSORS];
@@ -196,16 +191,20 @@ void loop() {
 
   // *** Manipulating 4-sensor signal ***
   // decaying max
+  double decay_rate;
   if (USE_DECAY_MAX) {
     for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
-      decaying_max[sensorNum] = max(rms_avg_s[sensorNum], decaying_max[sensorNum]);
-      /*if (rms_avg_s[sensorNum] > decaying_max[sensorNum]) {
+      if (rms_avg_s[sensorNum] > decaying_max[sensorNum]) {
         decaying_max[sensorNum] = rms_avg_s[sensorNum];
-        }*/
+        decay_cnt = 0;
+      }
       rms_avg_s[sensorNum] = decaying_max[sensorNum];
-      decaying_max[sensorNum] = decaying_max[sensorNum] - (DECAY_MAX_CONST + DECAY_MAX_LIN * decaying_max[sensorNum] + DECAY_MAX_SQ * sq(decaying_max[sensorNum]) + DECAY_MAX_ROOT * sqrt(decaying_max[sensorNum]));
+      decay_rate = DECAY_MAX_CONST +  (DECAY_MAX_LIN + DECAY_MAX_LINLOG * log(decay_cnt + 1)) * decay_cnt + DECAY_MAX_SQ * sq(decay_cnt) +  DECAY_MAX_ROOT * sqrt(decay_cnt) + DECAY_MAX_LOG * log(decay_cnt + 1);
+      decay_rate = decay_rate * DECAY_MAX_AMP;
+      decaying_max[sensorNum] = decaying_max[sensorNum] * (1 - min(decay_rate, 1));
       decaying_max[sensorNum] = max(decaying_max[sensorNum], DECAY_MIN);
     }
+    decay_cnt++;
     // print decaying max
     if (PRINT_RMS_MAX_DECAY) printArray(decaying_max);
   }
