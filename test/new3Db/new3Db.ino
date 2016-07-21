@@ -45,7 +45,7 @@ long decay_cnt = 0;
 // Print Modes and Parameters
 #define PRINT_RMS_RAW 0
 #define PRINT_RMS_AVG 1
-#define USE_DECAY_MAX 1
+#define USE_DECAY_MAX 0
 #define PRINT_RMS_MAX_DECAY 0
 #define PRINT_RMS_DIFF 0
 #define PRINT_RMS_MOD 0
@@ -57,7 +57,7 @@ const int PRINT_CHANNEL_S[] = {1, 1, 1, 1};
 
 // Fake Input Parameters
 #define FAKE_INPUT true
-const double FAKE_BIAS_S[] = {1.0, 3.11, 0.52, 5.71};
+const double FAKE_BIAS_S[] = {5.0, 3.11, 8.52, 10.71};
 const double FAKE_CROSSTALK_S[] = {0, 0.1, 0.5, 1};
 int cntFakeTime = 0;
 const double SPEED_ACT_MOD[] = {0.05, 0.056, 0.04, 0.045};
