@@ -45,21 +45,21 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 
 """ 2. Constants """
 
-sensor_num = 2
-motion_time = 2
+sensor_num = 4
+motion_time = 5
 motion_num = 5
-xmax = 6
-xmin = -1
-ymax = 6
-ymin = -1
+xmax = 3
+xmin = 0
+ymax = 3
+ymin = 0
 #for 3D
-zmax = 6
-zmin = -1
+zmax = 3
+zmin = 0
 #for 4D
-xmax2 = 6
-xmin2 = -1
-ymax2 = 6
-ymin2 = -1
+xmax2 = 3
+xmin2 = 0
+ymax2 = 3
+ymin2 = 0
 colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'w']
 
 
@@ -123,7 +123,7 @@ def costfunc(theta,x,y):
 
 """ 5. Options """
 
-cont_mode = True
+cont_mode = False
 store_data = False
 store_image = False
 second_loop = True
@@ -131,7 +131,7 @@ converted = False  #for 3D
     
 """ 6. Serial """
 
-ser = serial.Serial(port='COM6',baudrate=9600,timeout=None)
+ser = serial.Serial(port='COM6',baudrate=1200,timeout=None)
 print("connected to: " + ser.portstr)
 
 """ 7. Plot """
@@ -167,7 +167,6 @@ while cont_mode:
         ser.reset_output_buffer()
         
     c = ser.readline()
-    print(c)
     c = (str(c)[2:-5])
     c = c.split(",")
     
@@ -186,6 +185,7 @@ while cont_mode:
         
     if sensor_num == 4:
         if ((len(a) == 4)):
+
             x1 = float(a[0])
             y1 = float(a[1])
             x2 = float(a[2])
@@ -242,10 +242,11 @@ while current_motion_num < motion_num:
         if index>=20:
             ser.reset_input_buffer()
             ser.reset_output_buffer()
-            
         c = ser.readline()
         c = (str(c)[2:-5])
         c = c.split(",")
+        print(c)  
+        
         
         try:
             a = [float(i) for i in c]
@@ -302,9 +303,8 @@ while current_motion_num < motion_num:
         time2 = time.time()
     ser.reset_input_buffer()
     ser.reset_output_buffer()
-    #input("Motion has finished. Please press enter to continue")
-    ser.reset_input_buffer()
-    ser.reset_output_buffer()
+    input("Motion has finished. Please press enter to continue")
+    index = 0
             
     current_motion_num += 1
 print("Recording has completed.")

@@ -52,7 +52,7 @@ long decay_cnt = 0;
 #define PRINT_RMS_LOG 0
 #define PRINT_NUM_DECIMALS 2
 #define PRINT_DELAY 0.005
-#define SEE_WAVEFORM_OLD 1
+#define SEE_WAVEFORM_OLD 0
 int PRINT_CHANNEL_S[] = {1, 1, 1, 1};
 
 // Fake Input Parameters
@@ -92,7 +92,7 @@ void randWave(double a[]) {
 }
 
 void setup() {
-  Serial.begin(9600); //This line tells the Serial port to begin communicating at 9600 bauds
+  Serial.begin(1200); //This line tells the Serial port to begin communicating at 9600 bauds
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
     pinMode(SENSOR_PIN[sensorNum], INPUT);
     digitalWrite(SENSOR_PIN[sensorNum], LOW);
@@ -136,19 +136,20 @@ void printArray(double a[]) {
         }
       }
     }
-    Serial.println("");
+    Serial.println();
     delay(PRINT_DELAY);
   } else {
-    String toPrint = "";
+    String toPrint;
     if (PRINT_CHANNEL_S[0]) {
-      String toPrint = String(a[0], PRINT_NUM_DECIMALS);
+      toPrint = String(a[0], PRINT_NUM_DECIMALS);
     }
+    
     for (int sensorNum = 1; sensorNum < NUM_SENSORS; sensorNum++) {
       if (PRINT_CHANNEL_S[sensorNum]) {
         if (toPrint.length() > 0) {
-          String toPrint = String(toPrint + ",");
+          toPrint = toPrint + ",";
         }
-        String toPrint = String(toPrint + String(a[sensorNum], PRINT_NUM_DECIMALS));
+        toPrint = toPrint + String(a[sensorNum], PRINT_NUM_DECIMALS);
       }
     }
     Serial.println(toPrint);
