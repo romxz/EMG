@@ -46,12 +46,12 @@ long decay_cnt = 0;
 #define PRINT_RMS_RAW 0
 #define PRINT_RMS_AVG 0
 #define USE_DECAY_MAX 1
-#define PRINT_RMS_MAX_DECAY 1
+#define PRINT_RMS_MAX_DECAY 0
 #define PRINT_RMS_DIFF 0
 #define PRINT_RMS_MOD 0
-#define PRINT_RMS_LOG 0
+#define PRINT_RMS_LOG 1
 #define PRINT_NUM_DECIMALS 2
-#define PRINT_DELAY 0.005
+#define PRINT_DELAY 2
 #define SEE_WAVEFORM_OLD 0
 int PRINT_CHANNEL_S[] = {1, 1, 1, 1};
 
@@ -68,7 +68,7 @@ const double SPEED_ACT_MOD[] = {0.05, 0.056, 0.04, 0.045};
 #define CHANNEL_SWITCHING 1
 
 // Log Output parameters
-#define RMS_MOD_MIN_RANGE 0.001 // Keep modulated rms output above this value
+#define RMS_MOD_MIN_RANGE 0.05 // Keep modulated rms output above this value
 #define LOG_MAX_RANGE 6 // Keep log output below this value
 
 void randWave(double a[]) {
@@ -79,11 +79,11 @@ void randWave(double a[]) {
     randNoise = random(11);
     sqwave_s[sensorNum] = (sensorNum + 1) * ANGLE_PHASE * (1 + randNoise / 50.0);
     randNoise = random(11);
-    sqwave_s[sensorNum] = sq(sq(sin(sqwave_s[sensorNum] + SPEED_CNST_HELD * cntFakeTime * (1 + randNoise / 20.0))));
+    sqwave_s[sensorNum] = sq(sin(sqwave_s[sensorNum] + SPEED_CNST_HELD * cntFakeTime * (1 + randNoise / 20.0)));
     randNoise = random(11);
     sqwave_s[sensorNum] = (randNoise / 10.0) * sqwave_s[sensorNum];
     randNoise = random(11);
-    sqwave_s[sensorNum] = sqwave_s[sensorNum] * FAKE_BIAS_S[sensorNum] * sq(sq(sin(cntFakeTime * (SPEED_ACT_MOD[sensorNum] * (1 + randNoise / 50) + ANGLE_PHASE_SLOW) + sensorNum * ANGLE_PHASE * (1 + randNoise / 60.0))));
+    sqwave_s[sensorNum] = sqwave_s[sensorNum] * FAKE_BIAS_S[sensorNum] * sq(sin(cntFakeTime * (SPEED_ACT_MOD[sensorNum] * (1 + randNoise / 50) + ANGLE_PHASE_SLOW) + sensorNum * ANGLE_PHASE * (1 + randNoise / 60.0)));
   }
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
     if (CHANNEL_SWITCHING) {
@@ -143,7 +143,7 @@ void printArray(double a[]) {
         if (PRINT_CHANNEL_S[sensorNum]) {
           Serial.print(a[sensorNum]);
           delay(PRINT_DELAY);
-          Serial.print(",");
+          Serial.print(" ");
           delay(PRINT_DELAY);
         }
       }
@@ -158,13 +158,15 @@ void printArray(double a[]) {
 
     for (int sensorNum = 1; sensorNum < NUM_SENSORS; sensorNum++) {
       if (PRINT_CHANNEL_S[sensorNum]) {
-        if (toPrint.length() > 0) {
-          toPrint = toPrint + ",";
-        }
-        toPrint = toPrint + String(a[sensorNum], PRINT_NUM_DECIMALS);
+        /*if (toPrint.length() > 0) {
+          toPrint = toPrint + " ";
+          }*/
+        toPrint = toPrint + " " + String(a[sensorNum], PRINT_NUM_DECIMALS);
       }
     }
-    Serial.println(toPrint);
+    Serial.print(toPrint);
+    delay(PRINT_DELAY);
+    Serial.println();
     delay(PRINT_DELAY);
   }
 }
@@ -236,7 +238,6 @@ void loop() {
   }
   rms_radius_norm = sqrt(rms_radius_norm) / NUM_SENSORS;
   if (NEW_DIFF) {
-
     int rank[NUM_SENSORS] = {1, 1, 1, 1};
     // get rank of signals in terms of size
     for (int sensorNum = 0; sensorNum < NUM_SENSORS - 1; sensorNum++) {
@@ -249,7 +250,7 @@ void loop() {
       }
     }
     for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
-      rms_diff_s[sensorNum] = rms_radius_norm * rms_avg_s[sensorNum] / 40.0;
+      rms_diff_s[sensorNum] = rms_radius_norm * rms_avg_s[sensorNum] * rank[sensorNum] / NUM_SENSORS;
     }
   } else {
     double rms_diff_norm = 1.0; // signal difference norm
