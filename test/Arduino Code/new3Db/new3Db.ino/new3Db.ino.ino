@@ -52,19 +52,19 @@ long decay_cnt = 0;
 #define PRINT_RMS_LOG 0
 #define PRINT_NUM_DECIMALS 2
 #define PRINT_DELAY 0.005
-#define SEE_WAVEFORM_OLD 1
+#define SEE_WAVEFORM_OLD 0
 int PRINT_CHANNEL_S[] = {1, 1, 1, 1};
 
 // Fake Input Parameters
 #define FAKE_INPUT true
 const double FAKE_BIAS_S[] = {5.0, 3.11, 8.52, 10.71};
-const double FAKE_CROSSTALK_S[] = {0, 0.1, 0.5, 1};
+const double FAKE_CROSSTALK_S[] = {0.12, 0.1, 0.05, 0.001};
 int cntFakeTime = 0;
 const double SPEED_ACT_MOD[] = {0.05, 0.056, 0.04, 0.045};
 #define SPEED_CNST_HELD 0.08
 #define ANGLE_PHASE 0.7
 #define ANGLE_PHASE_SLOW 0.001
-#define CHANNEL_SWITCH_INTERVAL 800
+#define CHANNEL_SWITCH_INTERVAL 200
 #define CHANNEL_SWITCHING 1
 
 // Log Output parameters
@@ -87,7 +87,7 @@ void randWave(double a[]) {
   }
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
     if (CHANNEL_SWITCHING) {
-      if (((cntFakeTime / CHANNEL_SWITCH_INTERVAL) % NUM_SENSORS) == sensorNum) {
+      if ((((int)((cntFakeTime % (NUM_SENSORS * CHANNEL_SWITCH_INTERVAL)) / (CHANNEL_SWITCH_INTERVAL + 0.0))) % NUM_SENSORS) == sensorNum) {
         channel_ON = 1;
       } else {
         channel_ON = 0;
@@ -148,19 +148,20 @@ void printArray(double a[]) {
         }
       }
     }
-    Serial.println("");
+    Serial.println();
     delay(PRINT_DELAY);
   } else {
-    String toPrint = "";
+    String toPrint;
     if (PRINT_CHANNEL_S[0]) {
-      String toPrint = String(a[0], PRINT_NUM_DECIMALS);
+      toPrint = String(a[0], PRINT_NUM_DECIMALS);
     }
+
     for (int sensorNum = 1; sensorNum < NUM_SENSORS; sensorNum++) {
       if (PRINT_CHANNEL_S[sensorNum]) {
         if (toPrint.length() > 0) {
-          String toPrint = String(toPrint + ",");
+          toPrint = toPrint + ",";
         }
-        String toPrint = String(toPrint + String(a[sensorNum], PRINT_NUM_DECIMALS));
+        toPrint = toPrint + String(a[sensorNum], PRINT_NUM_DECIMALS);
       }
     }
     Serial.println(toPrint);
