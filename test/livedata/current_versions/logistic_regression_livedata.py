@@ -46,20 +46,20 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 """ 2. Constants """
 
 sensor_num = 4
-motion_time = 5
-motion_num = 5
-xmax = 3
-xmin = 0
-ymax = 3
-ymin = 0
+motion_time = 20
+motion_num = 4
+xmax = 2
+xmin = -0.5
+ymax = 2
+ymin = -0.5
 #for 3D
-zmax = 3
-zmin = 0
+zmax = 3.5
+zmin = -0.5
 #for 4D
-xmax2 = 3
-xmin2 = 0
-ymax2 = 3
-ymin2 = 0
+xmax2 = 3.5
+xmin2 = -0.5
+ymax2 = 3.5
+ymin2 = -0.5
 colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'w']
 
 
@@ -131,7 +131,7 @@ converted = False  #for 3D
     
 """ 6. Serial """
 
-ser = serial.Serial(port='COM6',baudrate=1200,timeout=None)
+ser = serial.Serial(port='COM6',baudrate=9600,timeout=None)
 print("connected to: " + ser.portstr)
 
 """ 7. Plot """
@@ -239,9 +239,9 @@ while current_motion_num < motion_num:
     time2 = time.time()
     index = 0
     while time2 - time1 < motion_time:
-        if index>=20:
-            ser.reset_input_buffer()
-            ser.reset_output_buffer()
+        #if index>=20:
+            #ser.reset_input_buffer()
+            #ser.reset_output_buffer()
         c = ser.readline()
         c = (str(c)[2:-5])
         c = c.split(",")
@@ -303,7 +303,7 @@ while current_motion_num < motion_num:
         time2 = time.time()
     ser.reset_input_buffer()
     ser.reset_output_buffer()
-    input("Motion has finished. Please press enter to continue")
+    #input("Motion has finished. Please press enter to continue")
     index = 0
             
     current_motion_num += 1

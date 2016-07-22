@@ -22,13 +22,13 @@ int counterArray = 0;
 #define DECAY_MIN 0.001
 double decaying_max[] = {DECAY_MIN, DECAY_MIN, DECAY_MIN, DECAY_MIN};
 long decay_cnt = 0;
-#define DECAY_MAX_CONST 0.5
+#define DECAY_MAX_CONST 2
 #define DECAY_MAX_LIN 0
-#define DECAY_MAX_LINLOG 0.05
+#define DECAY_MAX_LINLOG 0.15
 #define DECAY_MAX_SQ 0
 #define DECAY_MAX_ROOT 0
 #define DECAY_MAX_LOG 0
-#define DECAY_MAX_AMP 0.001
+#define DECAY_MAX_AMP 0.005
 
 // Averaged window memory shape factors:
 #define AVG_MEM_CONST 0
@@ -44,9 +44,9 @@ long decay_cnt = 0;
 
 // Print Modes and Parameters
 #define PRINT_RMS_RAW 0
-#define PRINT_RMS_AVG 1
-#define USE_DECAY_MAX 0
-#define PRINT_RMS_MAX_DECAY 0
+#define PRINT_RMS_AVG 0
+#define USE_DECAY_MAX 1
+#define PRINT_RMS_MAX_DECAY 1
 #define PRINT_RMS_DIFF 0
 #define PRINT_RMS_MOD 0
 #define PRINT_RMS_LOG 0
