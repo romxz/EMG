@@ -53,7 +53,7 @@ long decay_cnt = 0;
 #define PRINT_NUM_DECIMALS 2
 #define PRINT_DELAY 0.005
 #define SEE_WAVEFORM_OLD 1
-const int PRINT_CHANNEL_S[] = {1, 1, 1, 1};
+int PRINT_CHANNEL_S[] = {1, 1, 1, 1};
 
 // Fake Input Parameters
 #define FAKE_INPUT true
@@ -97,7 +97,7 @@ void setup() {
     pinMode(SENSOR_PIN[sensorNum], INPUT);
     digitalWrite(SENSOR_PIN[sensorNum], LOW);
   }
-  randomSeed(SENSOR_PIN[0]);
+  //randomSeed(SENSOR_PIN[0]);
 }
 
 // Takes weighted average, weight shape depending on factors defined at the top
