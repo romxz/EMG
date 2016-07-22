@@ -64,6 +64,8 @@ const double SPEED_ACT_MOD[] = {0.05, 0.056, 0.04, 0.045};
 #define SPEED_CNST_HELD 0.08
 #define ANGLE_PHASE 0.7
 #define ANGLE_PHASE_SLOW 0.001
+#define CHANNEL_SWITCH_INTERVAL 800
+#define CHANNEL_SWITCHING 1
 
 // Log Output parameters
 #define RMS_MOD_MIN_RANGE 0.001 // Keep modulated rms output above this value
@@ -72,6 +74,7 @@ const double SPEED_ACT_MOD[] = {0.05, 0.056, 0.04, 0.045};
 void randWave(double a[]) {
   double sqwave_s[NUM_SENSORS];
   long randNoise;
+  int channel_ON;
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
     randNoise = random(11);
     sqwave_s[sensorNum] = (sensorNum + 1) * ANGLE_PHASE * (1 + randNoise / 50.0);
@@ -83,7 +86,16 @@ void randWave(double a[]) {
     sqwave_s[sensorNum] = sqwave_s[sensorNum] * FAKE_BIAS_S[sensorNum] * sq(sq(sin(cntFakeTime * (SPEED_ACT_MOD[sensorNum] * (1 + randNoise / 50) + ANGLE_PHASE_SLOW) + sensorNum * ANGLE_PHASE * (1 + randNoise / 60.0))));
   }
   for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
-    a[sensorNum] = sqwave_s[sensorNum];
+    if (CHANNEL_SWITCHING) {
+      if (((cntFakeTime / CHANNEL_SWITCH_INTERVAL) % NUM_SENSORS) == sensorNum) {
+        channel_ON = 1;
+      } else {
+        channel_ON = 0;
+      }
+    } else {
+      channel_ON = 1;
+    }
+    a[sensorNum] = channel_ON * sqwave_s[sensorNum];
     for (int sensorNumOther = 1; sensorNumOther < NUM_SENSORS - 1; sensorNumOther++) {
       a[sensorNum] = a[sensorNum] + FAKE_CROSSTALK_S[sensorNum] * sqwave_s[(sensorNum + sensorNumOther) % NUM_SENSORS];
     }
