@@ -436,6 +436,23 @@ for i in range(motion_num):
         y_vec.append([all_data[i][-1]])
 
 
+
+mult=1
+probabilities = []
+for x1 in range(xmin*mult, xmax*mult+1, 1):
+    for y1 in range(ymin*mult, ymax*mult+1, 1):
+        for x2 in range(xmin2*mult, xmax2*mult+1, 1):
+            for y2 in range(ymin2*mult, ymax2*mult+1, 1):
+                for i in range(len(optimal_theta)):
+                    probabilities.append(sigmoid(np.dot(np.array([optimal_theta[i]]),np.array([[x1/mult],[y1/mult],[x2/mult],[y2/mult]]))))
+                
+                cluster_num = np.argmax(probabilities)
+                ax1.scatter(x1/mult,y1/mult,s=150, marker ="s",color = colors[cluster_num])
+                ax2.scatter(x2/mult,y2/mult,s=150, marker = "s", color = colors[cluster_num])
+                print(probabilities)
+                probabilities = []
+print("HI")
+
 """ 7. Plot Reset """
 
 if sensor_num == 2:
@@ -453,20 +470,21 @@ elif sensor_num == 4:
     ax4.axis([xmin2,xmax2,ymin2,ymax2])
 plt.ion()
 
+mult=1 
 
 for i in range(motion_num):
-    for x1 in range(xmin*10, xmax*10, 1):
-        for y1 in range(ymin*10, ymax*10, 1):
-            for x2 in range(xmin2*10, xmin2*10, 1):
-                for y2 in range(ymin2*10, ymax2*10, 1):
-                    probabilities.append(sigmoid(np.dot(np.array([optimal_theta[i]]),np.array([[x1],[y1],[x2],[y2]]))))
-                    if distance([x1,y1,x2,y2],[centres[0][0], centres[0][1], centres[0][2], centres[0][3]]) > 2: 
+    for x1 in range(xmin*mult, xmax*mult, 1):
+        for y1 in range(ymin*mult, ymax*mult, 1):
+            for x2 in range(xmin2*mult, xmin2*mult, 1):
+                for y2 in range(ymin2*mult, ymax2*mult, 1):
+                    probabilities.append(sigmoid(np.dot(np.array([optimal_theta[i]]),np.array([[x1/mult],[y1/mult],[x2/mult],[y2/mult]]))))
+                    if distance([x1/mult,y1/mult,x2/mult,y2/mult],[centres[0][0], centres[0][1], centres[0][2], centres[0][3]]) > 2: 
                         cluster_num = np.argmax(probabilities)
                     else:
                         cluster_num = 0
 
-                    ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
-                    ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
+                    ax3.scatter(x1/mult,y1/mult,s=50, color = colors[cluster_num])
+                    ax4.scatter(x2/mult,y2/mult,s=50, color = colors[cluster_num])
 
 
 """ C. CONTINUOUS DATA TRACKING """
