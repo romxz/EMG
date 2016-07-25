@@ -16,10 +16,12 @@ A. Initialization and Setup
     8. Time
 B. Data Collection and Analysis 
     1. Loop
-    2. Save as CSV
-    3. Save as PNG
-    4. Multiclass Logistic Regression
-    5. Plot Reset
+    2. Centroids
+    3. Covariance Matrix
+    4. Save as CSV
+    5. Save as PNG
+    6. Multiclass Logistic Regression
+    7. Plot Reset
 C. Continuous Data Tracking
     
 """
@@ -46,7 +48,7 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 """ 2. Constants """
 
 sensor_num = 4
-motion_time = 20
+motion_time = 21
 motion_num = 4
 xmax = 2
 xmin = -0.5
@@ -60,11 +62,13 @@ xmax2 = 3.5
 xmin2 = -0.5
 ymax2 = 3.5
 ymin2 = -0.5
+n = 1 # for avg
 colors = ['g', 'm', 'b', 'r', 'c', 'y', 'k', 'w']
 
 
 """ 3. Variables """
 
+centres = []
 line = []
 optimal_theta = []
 probabilities = []
@@ -72,10 +76,13 @@ current_motion_num = 0
 index = 0
 if sensor_num == 2:
     all_data = [["logrms1","logrms2","class"]]
+    avg = [0, 0]
 elif sensor_num == 3:
     all_data = [["logrms1","logrms2","logrms3","class"]]
+    avg = [0,0,0]
 elif sensor_num == 4:
     all_data = [["logrms1","logrms2","logrms3","logrms4","class"]]
+    avg = [0,0,0,0]
 
 """ 4. Functions """
 
@@ -124,14 +131,16 @@ def costfunc(theta,x,y):
 """ 5. Options """
 
 cont_mode = False
-store_data = False
-store_image = False
+store_data = True
+store_image = True
 second_loop = True
 converted = False  #for 3D
-    
+centroids = True 
+cov_matrix = True
+  
 """ 6. Serial """
 
-ser = serial.Serial(port='COM6',baudrate=9600,timeout=None)
+ser = serial.Serial(port='COM10',baudrate=9600,timeout=None)
 print("connected to: " + ser.portstr)
 
 """ 7. Plot """
@@ -160,6 +169,8 @@ time2 = time.time()
 """ B. DATA COLLECTION AND ANALYSIS """
 
 """ 1. Loop """
+
+""" cont mode """
 
 while cont_mode:
     if index>=20:
@@ -198,6 +209,8 @@ while cont_mode:
             ax2.clear()
             ax1.axis([xmin,xmax,ymin,ymax])
             ax2.axis([xmin2,xmax2,ymin2,ymax2])
+            
+            
                     
     elif sensor_num == 3:
         if ((len(a) == 3)):
@@ -218,6 +231,7 @@ while cont_mode:
             ax.set_xlim(xmin,xmax)
             ax.set_ylim(ymin,ymax)
             ax.set_zlim(zmin,zmax)
+            
         
     elif sensor_num == 2: 
         if ((len(a) == 2)):              
@@ -228,11 +242,13 @@ while cont_mode:
             plt.clf()
             plt.axis([xmin,xmax,ymin,ymax])
                         
+
             
     line = []
          
     index += 1
 
+"""regular mode """
 
 while current_motion_num < motion_num:
     time1 = time.time()
@@ -272,6 +288,13 @@ while current_motion_num < motion_num:
                 ax2.scatter(x2,y2,s=30,c = colors[current_motion_num])
                 plt.show()
                 plt.pause(0.00001)
+                
+                if centroids == True:
+                    avg = np.divide([sum(x) for x in zip(np.multiply((n-1),[avg])[0].tolist(), [x1,y1,x2,y2])],n).tolist()
+                n += 1
+                
+                if current_motion_num == 0:
+                    print(avg)
                         
         elif sensor_num == 3:
             if ((len(a) == 3)):
@@ -288,6 +311,11 @@ while current_motion_num < motion_num:
                 all_data.append([x,y,z,current_motion_num])
                 ax.scatter(x,y,z, c = colors[current_motion_num], s=10, marker = "o")
                 plt.pause(0.00001)
+                
+            
+                if centroids == True:
+                    avg = np.divide([sum(x) for x in zip(np.multiply((n-1),[avg])[0].tolist(), [x,y,z])],n).tolist()
+                n += 1
             
         elif sensor_num == 2:   
             if ((len(a) == 2)):            
@@ -296,20 +324,54 @@ while current_motion_num < motion_num:
                 all_data.append([x,y,current_motion_num])
                 plt.scatter(x,y,s=30,c = colors[current_motion_num])
                 plt.pause(0.00001)
-                            
+                
+                if centroids == True:
+                    avg = np.divide([sum(x) for x in zip(np.multiply((n-1),[avg])[0].tolist(), [x,y])],n).tolist()
+                n += 1
                 
         line = []
         index += 1
         time2 = time.time()
+    if centroids == True:
+        centres.append(avg)
+        if sensor_num == 2:
+            avg = [0, 0]
+        elif sensor_num == 3:
+            avg = [0,0,0]
+        elif sensor_num == 4:
+            avg = [0,0,0,0]
+        n = 1
     ser.reset_input_buffer()
     ser.reset_output_buffer()
     #input("Motion has finished. Please press enter to continue")
     index = 0
             
     current_motion_num += 1
+
+""" 2. Centroids """
+
+if centroids == True:
+    for i in range(len(centres)):
+        print(i)
+        if sensor_num == 4:
+            fig0
+            ax1.scatter(centres[i][0], centres[i][1], c = colors[i], s = 50, marker = "s")
+            ax2.scatter(centres[i][2], centres[i][3], c = colors[i], s = 50, marker = "s")
+        elif sensor_num == 3:
+            ax.scatter(centres[i][0], centres[i][1], centres[i][2], c = colors[i], s = 50, marker = "s")
+        elif sensor_num == 2:
+            plt.scatter(centres[i][0], centres[i][1], c = colors[i], s = 50, marker = "s")
+    
 print("Recording has completed.")
     
-""" 2. Save as CSV """
+""" 3. Covariance Matrix """
+
+all_data = all_data[1:]
+if cov_matrix == True:
+    all_data_cov = np.cov(np.tranpose(np.array(all_data)))
+    print(all_data_cov)
+
+""" 4. Save as CSV """
 
 num1 = datetime.datetime.now().date() 
 num2 = datetime.datetime.now().time() 
@@ -324,26 +386,25 @@ if not os.path.exists(newpath):
 
 if store_data == True:
     #change save location below
-    with open("newpath" + '\\test' + num + '.csv', 'w', newline='') as csvfile:
+    with open(newpath + '\\test' + num + '.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile, delimiter=' ',
                                 quotechar='|', quoting=csv.QUOTE_MINIMAL)
         for i in all_data:
             writer.writerow(i)
     print ("Saved as CSV")
                 
-""" 3. Save as PNG """
+""" 5. Save as PNG """
 
 if store_image == True:
-    plt.savefig("newpath" + "\\fig"  + num + '.png')
+    plt.savefig(newpath + "\\fig"  + num + '.png')
     print ("Saved as PNG")
     
-""" 4. Multiclass Logistic Regression """
+""" 6. Multiclass Logistic Regression """
 
 
 
 y_vec = [] 
 x_mat = []
-all_data = all_data[1:]
 for i in range(len(all_data)):
     x_mat.append(all_data[i][0:-1])
     y_vec.append([all_data[i][-1]])
@@ -370,7 +431,7 @@ for i in range(motion_num):
         y_vec.append([all_data[i][-1]])
 
 
-""" 5. Plot Reset """
+""" 7. Plot Reset """
 
 if sensor_num == 2:
     fig1 = plt.figure(1)
