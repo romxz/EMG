@@ -28,7 +28,7 @@ long decay_cnt = 0;
 #define DECAY_MAX_SQ 0
 #define DECAY_MAX_ROOT 0
 #define DECAY_MAX_LOG 0
-#define DECAY_MAX_AMP 0.005
+#define DECAY_MAX_AMP 0.025
 
 // Averaged window memory shape factors:
 #define AVG_MEM_CONST 0
@@ -40,12 +40,14 @@ long decay_cnt = 0;
 #define NEW_DIFF 1
 #define AMP_DIFF_OLD 1.0
 #define AMP_DIFF_OLD_RADIUS 0.1
+#define AMP_DIFF_NEW 5.0
+#define AMP_DIFF_NEW_RADIUS .001
 #define RMS_AVG_AMP_MOD 0.5
 
 // Print Modes and Parameters
 #define PRINT_RMS_RAW 0
 #define PRINT_RMS_AVG 0
-#define USE_DECAY_MAX 1
+#define USE_DECAY_MAX 0
 #define PRINT_RMS_MAX_DECAY 0
 #define PRINT_RMS_DIFF 0
 #define PRINT_RMS_MOD 0
@@ -56,7 +58,7 @@ long decay_cnt = 0;
 int PRINT_CHANNEL_S[] = {1, 1, 1, 1};
 
 // Fake Input Parameters
-#define FAKE_INPUT true
+#define FAKE_INPUT false
 const double FAKE_BIAS_S[] = {5.0, 3.11, 8.52, 10.71};
 const double FAKE_CROSSTALK_S[] = {0.12, 0.1, 0.05, 0.001};
 int cntFakeTime = 0;
@@ -69,7 +71,7 @@ const double SPEED_ACT_MOD[] = {0.05, 0.056, 0.04, 0.045};
 
 // Log Output parameters
 #define RMS_MOD_MIN_RANGE 0.05 // Keep modulated rms output above this value
-#define LOG_MAX_RANGE 6 // Keep log output below this value
+#define LOG_MAX_RANGE 20 // Keep log output below this value
 
 void randWave(double a[]) {
   double sqwave_s[NUM_SENSORS];
@@ -250,7 +252,7 @@ void loop() {
       }
     }
     for (int sensorNum = 0; sensorNum < NUM_SENSORS; sensorNum++) {
-      rms_diff_s[sensorNum] = rms_radius_norm * rms_avg_s[sensorNum] * rank[sensorNum] / NUM_SENSORS;
+      rms_diff_s[sensorNum] = sqrt((1 + rms_radius_norm * AMP_DIFF_NEW_RADIUS) * AMP_DIFF_NEW * rms_avg_s[sensorNum] * rank[sensorNum] / NUM_SENSORS);
     }
   } else {
     double rms_diff_norm = 1.0; // signal difference norm

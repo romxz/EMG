@@ -75,6 +75,11 @@ optimal_theta = []
 probabilities = []
 current_motion_num = 0
 index = 0
+array1 = []
+array2 = []
+array3 = []
+array4 = []
+array0 = []
 if sensor_num == 2:
     all_data = [["logrms1","logrms2","class"]]
     avg = [0, 0]
@@ -141,8 +146,8 @@ store_image = True
 second_loop = True
 converted = False  #for 3D
 centroids = True
-cov_matrix = True
-prompt = True
+cov_matrix = False
+prompt = False
   
 """ 6. Serial """
 
@@ -198,7 +203,7 @@ while cont_mode:
             elif sensor_num == 3:
                 a = [0.1,0.1,0.1]
             elif sensor_num == 4:
-                a = [0.1,0.1,0.1,0.1]
+                a = [0.1]*14
         
     if sensor_num == 4:
         if ((len(a) == 4)):
@@ -282,18 +287,33 @@ while current_motion_num < motion_num:
             
         if sensor_num == 4:
             if ((len(a) == 4)):
-                x1 = float(a[0])
-                y1 = float(a[1])
+                x0 = float(a[0])
+                x1 = float(a[1])
                 x2 = float(a[2])
-                y2 = float(a[3])
-                all_data.append([x1,y1,x2,y2,current_motion_num])
-                ax1.scatter(x1,y1,s=30,c = colors[current_motion_num])
-                ax2.scatter(x2,y2,s=30,c = colors[current_motion_num])
+                x3 = float(a[3])
+                print(a)
+                x0x0 = float(a[0])*float(a[0])
+                x0x0x0 = float(a[0])*float(a[0])*float(a[0])
+                x2x2 = float(a[2])*float(a[2])
+                x2x2x2 = float(a[2])*float(a[2])*float(a[2])
+                all_data.append([x0,x1,x2,x3])
+                if current_motion_num == 0:
+                    array0.append([x0,x0x0,x0x0x0,x1,x2,x2x2,x2x2x2,x3])
+                elif current_motion_num == 1:
+                    array1.append([x0,x0x0,x0x0x0,x1,x2,x2x2,x2x2x2,x3])
+                elif current_motion_num == 2:
+                    array2.append([x0,x0x0,x0x0x0,x1,x2,x2x2,x2x2x2,x3])
+                elif current_motion_num == 3:
+                    array3.append([x0,x0x0,x0x0x0,x1,x2,x2x2,x2x2x2,x3])
+                elif current_motion_num == 4:
+                    array4.append([x0,x0x0,x0x0x0,x1,x2,x2x2,x2x2x2,x3])
+                ax1.scatter(x0,x1,s=30,c = colors[current_motion_num])
+                ax2.scatter(x2,x3,s=30,c = colors[current_motion_num])
                 plt.show()
                 plt.pause(0.00001)
                 
                 if centroids == True:
-                    avg = np.divide([sum(x) for x in zip(np.multiply((n-1),[avg])[0].tolist(), [x1,y1,x2,y2])],n).tolist()
+                    avg = np.divide([sum(x) for x in zip(np.multiply((n-1),[avg])[0].tolist(), [x0,x1,x2,x3])],n).tolist()
                 n += 1
                 
                         
@@ -368,6 +388,8 @@ if centroids == True:
             plt.scatter(centres[i][0], centres[i][1], c = colors[i], s = 50, marker = "s")
     
 print("Recording has completed.")
+
+rest_centroid = [centres[0][0], centres[0][1], centres[0][2], centres[0][3]]
     
 """ 3. Covariance Matrix """
 
@@ -406,10 +428,81 @@ if store_image == True:
     
 """ 6. Multiclass Logistic Regression """
 
+alldata = []
+y11 = []
+y21= []
+x11 = []
+x21 = []
+y12 = []
+y22 = []
+x12 = []
+x22 = []
+y13 = []
+y23 = []
+x13 = []
+x23 = []
+y14 = []
+y24 = []
+x14 = []
+x24 = []
+for i in range(len(array1)):
+    y11.append(array1[i][3])
+    y21.append(array1[i][7])
+    x11.append(array1[i][0:3])
+    x21.append(array1[i][4:7])
+for i in range(len(array2)):
+    y12.append(array2[i][3])
+    y22.append(array2[i][7])
+    x12.append(array2[i][0:3])
+    x22.append(array2[i][4:7])
+for i in range(len(array3)):
+    y13.append(array3[i][3])
+    y23.append(array3[i][7])
+    x13.append(array3[i][0:3])
+    x23.append(array3[i][4:7])
+for i in range(len(array4)):
+    y14.append(array4[i][3])
+    y24.append(array4[i][7])
+    x14.append(array4[i][0:3])
+    x24.append(array4[i][4:7])
+    
+x11 = np.ndarray.tolist(np.transpose(np.array(x11)))
+x21 = np.ndarray.tolist(np.transpose(np.array(x21)))
+x12 = np.ndarray.tolist(np.transpose(np.array(x12)))
+x22 = np.ndarray.tolist(np.transpose(np.array(x22)))
+x13 = np.ndarray.tolist(np.transpose(np.array(x13)))
+x23 = np.ndarray.tolist(np.transpose(np.array(x23)))
+x14 = np.ndarray.tolist(np.transpose(np.array(x14)))
+x24 = np.ndarray.tolist(np.transpose(np.array(x24)))
 
+x11 = np.column_stack(x11+[[1]*len(x11[0])])
+beta_hat1 = np.ndarray.tolist(np.linalg.lstsq(x11,y11)[0])
+x21 = np.column_stack(x21+[[1]*len(x21[0])])
+beta_hat2 = np.ndarray.tolist(np.linalg.lstsq(x21,y21)[0])
+x12 = np.column_stack(x12+[[1]*len(x12[0])])
+beta_hat3 = np.ndarray.tolist(np.linalg.lstsq(x12,y12)[0])
+x22 = np.column_stack(x22+[[1]*len(x22[0])])
+beta_hat4 = np.ndarray.tolist(np.linalg.lstsq(x22,y22)[0])
+x13 = np.column_stack(x13+[[1]*len(x13[0])])
+beta_hat5 = np.ndarray.tolist(np.linalg.lstsq(x13,y13)[0])
+x23 = np.column_stack(x23+[[1]*len(x23[0])])
+beta_hat6 = np.ndarray.tolist(np.linalg.lstsq(x23,y23)[0])
+x14 = np.column_stack(x14+[[1]*len(x14[0])])
+beta_hat7 = np.ndarray.tolist(np.linalg.lstsq(x14,y14)[0])
+x24 = np.column_stack(x24+[[1]*len(x24[0])])
+beta_hat8 = np.ndarray.tolist(np.linalg.lstsq(x24,y24)[0])
+
+print("hi")
+alldata.append(beta_hat1+beta_hat2+[0])
+alldata.append(beta_hat3+beta_hat4+[1])
+alldata.append(beta_hat5+beta_hat6+[2])
+alldata.append(beta_hat7+beta_hat8+[3])
+
+print(alldata)
 
 y_vec = [] 
 x_mat = []
+all_data= alldata
 for i in range(len(all_data)):
     x_mat.append(all_data[i][0:-1])
     y_vec.append([all_data[i][-1]])
@@ -483,20 +576,25 @@ if second_loop == True:
                     
         if sensor_num == 4:
             if ((len(a) == 4)):
-                x1 = float(a[0])
-                y1 = float(a[1])
+                x0 = float(a[0])
+                x1 = float(a[1])
                 x2 = float(a[2])
-                y2 = float(a[3])
+                x3 = float(a[3])
+                
+                m1 = (x1 - centres[0][1])/(x0 - centres[0][0])
+                m2 = (x3 - centres[0][3])/(x0 - centres[0][2])
+                b1 =( x1 - m1*x0 )
+                b2 = (x3 - m2*x2)
                 
                 for i in range(motion_num):
-                    probabilities.append(sigmoid(np.dot(np.array([optimal_theta[i]]),np.array([[x1],[y1],[x2],[y2]]))))
-                if distance([x1,y1,x2,y2],[centres[0][0], centres[0][1], centres[0][2], centres[0][3]]) > 2: 
+                    probabilities.append(sigmoid(np.dot(np.array([optimal_theta[i]]),np.array([[m1],[0],[0],[b1],[m2],[0],[0],[b2]]))))
+                if distance([x0,x1,x2,x3],[centres[0][0], centres[0][1], centres[0][2], centres[0][3]]) > 2: 
                     cluster_num = np.argmax(probabilities)
                 else:
                     cluster_num = 0
                 
-                ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
-                ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
+                ax3.scatter(x0,x1,s=50, color = colors[cluster_num])
+                ax4.scatter(x2,x3,s=50, color = colors[cluster_num])
                 plt.pause(0.0000001)
                 ax3.clear()
                 ax4.clear()

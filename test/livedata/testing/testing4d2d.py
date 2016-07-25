@@ -48,7 +48,7 @@ os.path.abspath("C:\\Users\\Michael\\Documents\\GitHub\\EMG\\test\\csvfiles")
 """ 2. Constants """
 
 sensor_num = 4
-motion_time = 20
+motion_time = 2
 motion_num = 5
 xmax = 8
 xmin = 2
@@ -142,7 +142,7 @@ second_loop = True
 converted = False  #for 3D
 centroids = True
 cov_matrix = True
-prompt = True
+prompt = False
   
 """ 6. Serial """
 
@@ -452,6 +452,21 @@ elif sensor_num == 4:
     ax3.axis([xmin,xmax,ymin,ymax])
     ax4.axis([xmin2,xmax2,ymin2,ymax2])
 plt.ion()
+
+
+for i in range(motion_num):
+    for x1 in range(xmin*10, xmax*10, 1):
+        for y1 in range(ymin*10, ymax*10, 1):
+            for x2 in range(xmin2*10, xmin2*10, 1):
+                for y2 in range(ymin2*10, ymax2*10, 1):
+                    probabilities.append(sigmoid(np.dot(np.array([optimal_theta[i]]),np.array([[x1],[y1],[x2],[y2]]))))
+                    if distance([x1,y1,x2,y2],[centres[0][0], centres[0][1], centres[0][2], centres[0][3]]) > 2: 
+                        cluster_num = np.argmax(probabilities)
+                    else:
+                        cluster_num = 0
+
+                    ax3.scatter(x1,y1,s=50, color = colors[cluster_num])
+                    ax4.scatter(x2,y2,s=50, color = colors[cluster_num])
 
 
 """ C. CONTINUOUS DATA TRACKING """
