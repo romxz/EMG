@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 """This code collects data that has been pre-classified for each motion. 
 For each motion, linear regression is performed up to the third root of the independent variable
@@ -7,6 +8,16 @@ Upon reading a new sample of data (set to a certain array of points), linear reg
 Table of Contents
 
 A. SETUP
+=======
+"""
+PLOTTING LIVE DATA AND ANALYSIS
+
+FOR USE WITH ARDUINO CODE "NEW3D" (OR SIMILAR)
+
+|||||Contents List|||||
+
+A. Initialization and Setup
+>>>>>>> origin
     1. Libraries
     2. Constants
     3. Variables
@@ -17,11 +28,20 @@ A. SETUP
     8. Time
 B. Data Collection and Analysis 
     1. Loop
+<<<<<<< HEAD
     2. Rest Centroid
     3. Save as CSV
     4. Save as PNG
     5. Logistic Regression
     6. Plot Reset
+=======
+    2. Centroids
+    3. Covariance Matrix
+    4. Save as CSV
+    5. Save as PNG
+    6. Multiclass Logistic Regression
+    7. Plot Reset
+>>>>>>> origin
 C. Continuous Data Tracking
     
 """
