@@ -318,4 +318,5 @@ void loop() {
   if (counterArray >= AVG_WINDOW_SIZE) {
     counterArray = 0;
   }
+ 
 }

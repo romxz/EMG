@@ -6,8 +6,8 @@
     "default_icon": "images/icon.png"
   },
   "background":{
-    "scripts": ["livedata.js"]
+    "scripts": ["jquery.js","livedata.js"]
   },
-  "permissions": ["tabs"],
+  "permissions": ["tabs", "serial"],
   "manifest_version": 2
 }
