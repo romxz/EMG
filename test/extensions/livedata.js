@@ -3,7 +3,11 @@ chrome.browserAction.onClicked.addListener(function(activeTab){
   chrome.tabs.create({ url: newURL });
 });
 
+<<<<<<< HEAD
+/*
+=======
 
+>>>>>>> 0eac2657e962efa0386942144891f75f6d0cf0d0
 $(document).ready(function() {
     chrome.serial.getDevices(function(devices) {
         for (var i = 0; i < devices.length; i++) {
@@ -29,4 +33,10 @@ $(document).ready(function() {
 
         $(this).data("clicks", !clicks);
     });
+<<<<<<< HEAD
 });
+*?
+*/
+=======
+});
+>>>>>>> 0eac2657e962efa0386942144891f75f6d0cf0d0
