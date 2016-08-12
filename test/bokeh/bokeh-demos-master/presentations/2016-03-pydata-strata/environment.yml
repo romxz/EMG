@@ -1,0 +1,10 @@
+name: strata_tutorial_san_jose
+dependencies:
+  - python>=3.4
+  - bokeh
+  - pandas
+  - ipython-notebook
+  - ipywidgets
+  - scikit-learn
+  - flexx
+  - flask # To run the slides locally

@@ -1,0 +1,10 @@
+/build
+/node_modules
+/typings
+*~
+*.sw[opn]
+*.bak
+*#*
+*.#*
+*.DS_Store
+npm-debug.log
