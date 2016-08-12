@@ -1,1 +1,0 @@
-require "./resize_tool"

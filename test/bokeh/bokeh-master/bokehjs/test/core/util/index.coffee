@@ -1,5 +1,0 @@
-require "./bbox"
-require "./color"
-require "./math"
-require "./refs"
-require "./svg_colors"

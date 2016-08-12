@@ -1,6 +1,0 @@
-name: happiness
-dependencies:
-  - bokeh
-  - django
-  - ipython-notebook
-  # - pandas  # Uncomment this line if you are using bokeh < 0.11.1
