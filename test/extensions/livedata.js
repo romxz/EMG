@@ -29,7 +29,7 @@ $(document).ready(function() {
                 $("button#open").html("Open Port");
                 console.log('Connection with id: ' + connectionId + ' closed');
             });
-        }
+}
 
         $(this).data("clicks", !clicks);
     });
