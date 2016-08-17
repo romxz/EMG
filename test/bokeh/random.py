@@ -1,10 +1,14 @@
 <<<<<<< HEAD
+
+=======
+<<<<<<< HEAD
 <<<<<<< HEAD
 # FOR SERVER SETUP : bokeh-server -m --ip 127.0.0.1
 =======
 >>>>>>> 668ffd5a81a765d02feed26e209efce573d06d30
 =======
 >>>>>>> 668ffd5a81a765d02feed26e209efce573d06d30
+>>>>>>> 99db9b5f6b51fd0463277c2f941d63cc0055d91f
 import time
 import random
 from random import shuffle
@@ -39,13 +43,19 @@ while True:
     ds1.data["y"].append(a1)
     ds2.data["y"].append(b1)
 <<<<<<< HEAD
+
+=======
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> 99db9b5f6b51fd0463277c2f941d63cc0055d91f
     p.line(ds1.data["x"], ds1.data["y"], legend = "hi", name='ex_line1', color = "blue")
     cursession().store_objects(ds1)
     cursession().store_objects(ds2)
     time.sleep(0)
     i+= 1
     
+<<<<<<< HEAD
+=======
 =======
     cursession().store_objects(ds1)
     cursession().store_objects(ds2)
@@ -58,3 +68,4 @@ while True:
     time.sleep(0)
     i+= 1
 >>>>>>> 668ffd5a81a765d02feed26e209efce573d06d30
+>>>>>>> 99db9b5f6b51fd0463277c2f941d63cc0055d91f
