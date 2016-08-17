@@ -3,11 +3,16 @@ import time
 import random
 from random import shuffle
 from bokeh.plotting import figure, output_server, cursession, show, Session
+<<<<<<< HEAD
 import serial
 
 
 ser = serial.Serial(port='COM5',baudrate=9600,timeout=None)
 print("connected to: " + ser.portstr)
+=======
+
+
+>>>>>>> 99db9b5f6b51fd0463277c2f941d63cc0055d91f
 session = Session(root_url='http://127.0.0.1:5006/', load_from_config=False)
 #session.register('anon3', '1234')
 session.login('anon', '1234')
@@ -30,6 +35,7 @@ ds2 = renderer2[0].data_source
     
 i = 0
 while True:
+<<<<<<< HEAD
     c = ser.readline()
     c = (str(c)[2:-5])
     c = c.split(",")
@@ -38,6 +44,10 @@ while True:
     print(a)
     a1 = a[0]
     b1 = a[0] 
+=======
+    a1 = random.random()*10
+    b1 = random.random()*10
+>>>>>>> 99db9b5f6b51fd0463277c2f941d63cc0055d91f
     if i<=30:
         ds1.data["x"].append(i)
         ds2.data["x"].append(i)
