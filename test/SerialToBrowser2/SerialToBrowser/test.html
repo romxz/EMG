@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.3.16/p5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.3.16/addons/p5.dom.min.js"></script>
+
+	<script>
+		var label, serverResponse;	// UI elements
+		
+		function setup() {			
+			label = createSpan("Volume:");	// the label 
+			label.position(10,20);				// position it
+			serverResponse = createSpan();	// create a div for server responses
+			serverResponse.position(label.width + 15, 20);		// position it
+			getData(3);								// make a request back to the server
+		}
+		
+		// this function makes a call to the server:
+  		function getData(channel) {
+  			httpGet('/device/' + channel, update);
+  		}
+  		
+  		// update the page when the server responds:
+  		function update(data) {
+	  		serverResponse.html(data);		// put the response in the span
+	  		getData(3);							// make another call to the server
+  		}
+  		
+    </script>
+    
+        
+        
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+     google.charts.load('current', {packages: ['corechart', 'line']});
+google.charts.setOnLoadCallback(drawLineColors);
+
+      function drawLineColors() {
+       var options = {
+      width: 400,
+      height: 240,
+      vAxis: {minValue:0, maxValue:100},
+      animation: {
+        duration: 1000,
+        easing: 'in'
+      }
+    };
+
+    var chart = new google.visualization.LineChart(
+        document.getElementById('visualization'));
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'x');
+    data.addColumn('number', 'y');
+    data.addRow(['100', 123]);
+    data.addRow(['700', 17]);
+    var button = document.getElementById('b1');
+    function drawChart() {
+      // Disabling the button while the chart is drawing.
+      button.disabled = true;
+      google.visualization.events.addListener(chart, 'ready',
+          function() {
+            button.disabled = false;
+          });
+      chart.draw(data, options);
+    }
+
+    button.onclick = function() {
+      if (data.getNumberOfRows() > 5) {
+        data.removeRow(Math.floor(Math.random() * data.getNumberOfRows()));
+      }
+      // Generating a random x, y pair and inserting it so rows are sorted.
+      var x = Math.floor(Math.random() * 1000);
+      var y = Math.floor(Math.random() * 100);
+      var where = 0;
+      while (where < data.getNumberOfRows() && parseInt(data.getValue(where, 0)) < x) {
+        where++;
+      }
+      data.insertRows(where, [[x.toString(), y]]);
+      drawChart();
+    }
+    drawChart();
+      }
+    </script>
+        
+    
+	</head>
+	<body>
+         <div id="visualization" style="width: 900px; height: 500px"></div>
+        <button id = "b1">but</button>
+	</body>
+</html>

@@ -1,0 +1,8 @@
+body{
+    position:relative;
+}
+#b1{
+    color:red;
+    position:absolute;
+    top:350px;
+}
